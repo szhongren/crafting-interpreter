@@ -40,9 +40,9 @@ impl Lox {
 
     fn run(&self, source: &str) {
         // lifetime of source depends on caller
-        let scanner = Scanner { source };
+        let mut scanner = Scanner::new(source);
         for token in scanner.scan_tokens() {
-            println!("{}", token);
+            println!("{:?}", token);
         }
     }
 
