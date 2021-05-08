@@ -3,9 +3,10 @@ mod interpreter;
 use std::env;
 use std::process::exit;
 
-use interpreter::{run_file, run_prompt};
+use interpreter::Lox;
 
 fn main() {
+    let mut lox = Lox { had_error: false };
     let args: Vec<String> = env::args().collect();
     // different from go, first arg is always binary in rust
     if args.len() > 2 {
@@ -13,8 +14,8 @@ fn main() {
         exit(64)
     } else if args.len() == 2 {
         // lend args[1] to run_file
-        run_file(&args[1]);
+        lox.run_file(&args[1]);
     } else {
-        run_prompt();
+        lox.run_prompt();
     }
 }
