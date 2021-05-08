@@ -1,6 +1,4 @@
-use self::token::{token_type::TokenType, Token};
-
-mod token;
+use super::{token::Token, token_type::TokenType};
 
 pub struct Scanner<'a> {
     pub source: &'a str,
@@ -21,16 +19,18 @@ impl<'a> Scanner<'a> {
 
     pub fn scan_tokens(&mut self) -> Vec<Token> {
         let mut tokens = Vec::new();
-        while !self.is_at_end() {
+        let mut at_end = false;
+        while !at_end {
             // self.start = self.current;
             tokens.push(self.scan_token());
             // tokens.push(Token::new(TokenType::EOF, "", "", self.line))
+            at_end = self.is_at_end();
         }
         // tokens.push(Token::new(TokenType::EOF, "", "", self.line));
         tokens
     }
 
-    fn is_at_end(&self) -> bool {
+    fn is_at_end(&mut self) -> bool {
         self.current >= self.source.len()
     }
 

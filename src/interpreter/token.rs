@@ -1,6 +1,5 @@
-use self::token_type::TokenType;
+use super::token_type::TokenType;
 
-pub mod token_type;
 #[derive(Debug)]
 pub struct Token<'a> {
     token_type: TokenType,
