@@ -134,6 +134,7 @@ impl<'a> Scanner<'a> {
                 self.line += 1;
                 Option::None
             }
+            '"' => self.string(),
             ch => {
                 self.error(format!("unexpected character: {}", ch).as_str());
                 Option::None
@@ -196,5 +197,30 @@ impl<'a> Scanner<'a> {
         } else {
             self.get_current_char()
         }
+    }
+
+    fn string(&mut self) -> Option<Token<'a>> {
+        while self.peek() != '"' && !self.is_at_end() {
+            if self.peek() == '\n' {
+                self.line += 1;
+            }
+            self.advance();
+        }
+
+        if self.is_at_end() {
+            self.error("Unterminated string");
+            return Option::None;
+        }
+
+        self.advance();
+
+        let string_value = self.get_lexeme();
+        let string_literal = string_value.get(1..string_value.len() - 1).unwrap();
+        Option::from(Token::new(
+            TokenType::String,
+            string_literal,
+            string_literal,
+            self.line,
+        ))
     }
 }
