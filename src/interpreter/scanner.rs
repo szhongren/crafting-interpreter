@@ -48,6 +48,26 @@ impl<'a> Scanner<'a> {
             '+' => Option::from(TokenType::Plus),
             ';' => Option::from(TokenType::Semicolon),
             '*' => Option::from(TokenType::Star),
+            '!' => Option::from(if self.match_char('=') {
+                TokenType::BangEqual
+            } else {
+                TokenType::Bang
+            }),
+            '=' => Option::from(if self.match_char('=') {
+                TokenType::EqualEqual
+            } else {
+                TokenType::Equal
+            }),
+            '<' => Option::from(if self.match_char('=') {
+                TokenType::LessEqual
+            } else {
+                TokenType::Less
+            }),
+            '>' => Option::from(if self.match_char('=') {
+                TokenType::GreaterEqual
+            } else {
+                TokenType::Greater
+            }),
             _ => {
                 self.error("unexpected character");
                 Option::None
@@ -88,5 +108,17 @@ impl<'a> Scanner<'a> {
     fn report(&mut self, location: &str, message: &str) {
         eprintln!("[line {}] Error{}: {}", self.line, location, message);
         self.had_error = true;
+    }
+
+    fn match_char(&mut self, ch: char) -> bool {
+        if self.is_at_end() {
+            return false;
+        }
+        if self.source.chars().nth(self.current).unwrap() != ch {
+            return false;
+        }
+
+        self.current += 1;
+        true
     }
 }

@@ -46,7 +46,7 @@ impl Lox {
             return;
         }
 
-        if (scanner.had_error) {
+        if scanner.had_error {
             exit(65);
         }
     }
