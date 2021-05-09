@@ -6,7 +6,7 @@ use std::process::exit;
 use interpreter::Lox;
 
 fn main() {
-    let mut lox = Lox { had_error: false };
+    let lox = Lox {};
     let args: Vec<String> = env::args().collect();
     // different from go, first arg is always binary in rust
     if args.len() > 2 {

@@ -6,6 +6,7 @@ pub struct Scanner<'a> {
     start: usize,
     current: usize,
     line: i32,
+    pub had_error: bool,
 }
 
 impl<'a> Scanner<'a> {
@@ -16,6 +17,7 @@ impl<'a> Scanner<'a> {
             start: 0,
             current: 0,
             line: 1,
+            had_error: false,
         }
     }
 
@@ -35,7 +37,7 @@ impl<'a> Scanner<'a> {
 
     fn scan_token(&mut self) {
         let ch = self.advance();
-        self.add_token(match ch {
+        let token = match ch {
             '(' => TokenType::LeftParen,
             ')' => TokenType::RightParen,
             '{' => TokenType::LeftBrace,
@@ -47,10 +49,11 @@ impl<'a> Scanner<'a> {
             ';' => TokenType::Semicolon,
             '*' => TokenType::Star,
             _ => {
-                eprintln!("Something went very wrong");
+                self.error("unexpected character");
                 TokenType::Eof
             }
-        });
+        };
+        self.add_token(token);
     }
 
     fn advance(&mut self) -> char {
@@ -74,5 +77,14 @@ impl<'a> Scanner<'a> {
             .expect("self.start..self.current is not a valid slice of self.source");
         self.tokens
             .push(Token::new(token_type, text, literal, self.line))
+    }
+
+    pub fn error(&mut self, message: &str) {
+        self.report("", message);
+    }
+
+    fn report(&mut self, location: &str, message: &str) {
+        eprintln!("[line {}] Error{}: {}", self.line, location, message);
+        self.had_error = true;
     }
 }
