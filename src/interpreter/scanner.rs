@@ -1,4 +1,32 @@
-use super::{token::Token, token_type::TokenType};
+use super::{
+    token::{self, Token},
+    token_type::TokenType,
+};
+
+use std::collections::HashMap;
+
+lazy_static! {
+    static ref KEYWORDS_MAP: HashMap<&'static str, TokenType> = {
+        let mut m = HashMap::new();
+        m.insert("and", TokenType::And);
+        m.insert("class", TokenType::Class);
+        m.insert("else", TokenType::Else);
+        m.insert("false", TokenType::False);
+        m.insert("for", TokenType::For);
+        m.insert("fun", TokenType::Fun);
+        m.insert("if", TokenType::If);
+        m.insert("nil", TokenType::Nil);
+        m.insert("or", TokenType::Or);
+        m.insert("print", TokenType::Print);
+        m.insert("return", TokenType::Return);
+        m.insert("super", TokenType::Super);
+        m.insert("this", TokenType::This);
+        m.insert("true", TokenType::True);
+        m.insert("var", TokenType::Var);
+        m.insert("while", TokenType::While);
+        m
+    };
+}
 
 pub struct Scanner<'a> {
     pub source: &'a str,
@@ -251,6 +279,12 @@ impl<'a> Scanner<'a> {
             self.advance();
         }
 
-        self.generate_token_option(TokenType::Identifier)
+        let lexeme = self.get_lexeme();
+        let maybe_token_type = KEYWORDS_MAP.get(lexeme);
+
+        self.generate_token_option(match maybe_token_type {
+            Some(&token_type) => token_type,
+            None => TokenType::Identifier,
+        })
     }
 }
