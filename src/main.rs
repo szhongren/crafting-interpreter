@@ -4,26 +4,37 @@ extern crate lazy_static;
 mod ast_generator;
 mod interpreter;
 
-use std::env;
 use std::process::exit;
+use std::{env, io::Result};
 
+use ast_generator::define_ast;
 use interpreter::Lox;
 
-fn main() {
+fn main() -> Result<()> {
     let lox = Lox {};
     let args: Vec<String> = env::args().collect();
     // different from go, first arg is always binary in rust
     if args.len() > 2 {
-        println!("Usage: jlox [script]");
-        exit(64)
+        if &args[1] == "gen" {
+            define_ast(
+                &args[2],
+                "expr",
+                vec![
+                    "Binary: Expr left, Token operator, Expr right",
+                    "Grouping: Expr expression",
+                    "Literal: Object value",
+                    "Urnary: Token operator, Expr right",
+                ],
+            )?
+        } else {
+            println!("Usage: jlox [script]");
+            exit(64)
+        }
     } else if args.len() == 2 {
         // lend args[1] to run_file
-        if &args[1] == "gen" {
-            println!("gen")
-        } else {
-            lox.run_file(&args[1]);
-        }
+        lox.run_file(&args[1]);
     } else {
         lox.run_prompt();
     }
+    Ok(())
 }
