@@ -68,8 +68,24 @@ impl<'a> Scanner<'a> {
             } else {
                 TokenType::Greater
             }),
-            _ => {
-                self.error("unexpected character");
+            '/' => {
+                if self.match_char('/') {
+                    while self.peek() != '\n' && !self.is_at_end() {
+                        self.advance();
+                    }
+                    Option::None
+                } else {
+                    Option::from(TokenType::Slash)
+                }
+            }
+            // ignore whitespace
+            ' ' | '\r' | '\t' => Option::None,
+            '\n' => {
+                self.line += 1;
+                Option::None
+            }
+            ch => {
+                self.error(format!("unexpected character: {}", ch).as_str());
                 Option::None
             }
         };
@@ -79,12 +95,17 @@ impl<'a> Scanner<'a> {
     }
 
     fn advance(&mut self) -> char {
+        let ch = self.get_current_char();
+        self.current += 1;
+        ch
+    }
+
+    fn get_current_char(&mut self) -> char {
         let ch = self
             .source
             .chars()
             .nth(self.current)
             .expect("self.current is greater than the number of chars in self.source");
-        self.current += 1;
         ch
     }
 
@@ -114,11 +135,19 @@ impl<'a> Scanner<'a> {
         if self.is_at_end() {
             return false;
         }
-        if self.source.chars().nth(self.current).unwrap() != ch {
+        if self.get_current_char() != ch {
             return false;
         }
 
         self.current += 1;
         true
+    }
+
+    fn peek(&mut self) -> char {
+        if self.is_at_end() {
+            '\0'
+        } else {
+            self.get_current_char()
+        }
     }
 }
