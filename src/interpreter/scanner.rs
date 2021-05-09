@@ -38,22 +38,24 @@ impl<'a> Scanner<'a> {
     fn scan_token(&mut self) {
         let ch = self.advance();
         let token = match ch {
-            '(' => TokenType::LeftParen,
-            ')' => TokenType::RightParen,
-            '{' => TokenType::LeftBrace,
-            '}' => TokenType::RightBrace,
-            ',' => TokenType::Comma,
-            '.' => TokenType::Dot,
-            '-' => TokenType::Minus,
-            '+' => TokenType::Plus,
-            ';' => TokenType::Semicolon,
-            '*' => TokenType::Star,
+            '(' => Option::from(TokenType::LeftParen),
+            ')' => Option::from(TokenType::RightParen),
+            '{' => Option::from(TokenType::LeftBrace),
+            '}' => Option::from(TokenType::RightBrace),
+            ',' => Option::from(TokenType::Comma),
+            '.' => Option::from(TokenType::Dot),
+            '-' => Option::from(TokenType::Minus),
+            '+' => Option::from(TokenType::Plus),
+            ';' => Option::from(TokenType::Semicolon),
+            '*' => Option::from(TokenType::Star),
             _ => {
                 self.error("unexpected character");
-                TokenType::Eof
+                Option::None
             }
         };
-        self.add_token(token);
+        if token.is_some() {
+            self.add_token(token.unwrap());
+        }
     }
 
     fn advance(&mut self) -> char {
