@@ -93,6 +93,7 @@ impl<'a> Scanner<'a> {
             }
             '"' => self.string(),
             '0'..='9' => self.number(),
+            'a'..='z' | 'A'..='Z' | '_' => self.identifier(),
             ch => {
                 self.error(format!("unexpected character: {}", ch).as_str());
                 Option::None
@@ -203,6 +204,14 @@ impl<'a> Scanner<'a> {
         ch >= '0' && ch <= '9'
     }
 
+    fn is_alpha(ch: char) -> bool {
+        (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch == '_')
+    }
+
+    fn is_alphanumeric(ch: char) -> bool {
+        Self::is_alpha(ch) || Self::is_digit(ch)
+    }
+
     fn number(&mut self) -> Option<Token<'a>> {
         while Self::is_digit(self.peek()) {
             self.advance();
@@ -235,5 +244,13 @@ impl<'a> Scanner<'a> {
                 .nth(self.current + 1)
                 .expect("self.current + 1 is greater than the number of chars in self.source")
         }
+    }
+
+    fn identifier(&mut self) -> Option<Token<'a>> {
+        while Self::is_alphanumeric(self.peek()) {
+            self.advance();
+        }
+
+        self.generate_token_option(TokenType::Identifier)
     }
 }
