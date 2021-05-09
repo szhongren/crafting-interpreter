@@ -1,7 +1,4 @@
-use super::{
-    token::{self, Token},
-    token_type::TokenType,
-};
+use super::{token::Token, token_type::TokenType};
 
 use std::collections::HashMap;
 

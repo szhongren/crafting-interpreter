@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate lazy_static;
 
+mod ast_generator;
 mod interpreter;
 
 use std::env;
@@ -17,7 +18,11 @@ fn main() {
         exit(64)
     } else if args.len() == 2 {
         // lend args[1] to run_file
-        lox.run_file(&args[1]);
+        if &args[1] == "gen" {
+            println!("gen")
+        } else {
+            lox.run_file(&args[1]);
+        }
     } else {
         lox.run_prompt();
     }
