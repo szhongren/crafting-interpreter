@@ -38,35 +38,80 @@ impl<'a> Scanner<'a> {
     fn scan_token(&mut self) {
         let ch = self.advance();
         let token = match ch {
-            '(' => Option::from(TokenType::LeftParen),
-            ')' => Option::from(TokenType::RightParen),
-            '{' => Option::from(TokenType::LeftBrace),
-            '}' => Option::from(TokenType::RightBrace),
-            ',' => Option::from(TokenType::Comma),
-            '.' => Option::from(TokenType::Dot),
-            '-' => Option::from(TokenType::Minus),
-            '+' => Option::from(TokenType::Plus),
-            ';' => Option::from(TokenType::Semicolon),
-            '*' => Option::from(TokenType::Star),
+            '(' => Option::from(Token::new(
+                TokenType::LeftParen,
+                self.get_lexeme(),
+                "",
+                self.line,
+            )),
+            ')' => Option::from(Token::new(
+                TokenType::RightParen,
+                self.get_lexeme(),
+                "",
+                self.line,
+            )),
+            '{' => Option::from(Token::new(
+                TokenType::LeftBrace,
+                self.get_lexeme(),
+                "",
+                self.line,
+            )),
+            '}' => Option::from(Token::new(
+                TokenType::RightBrace,
+                self.get_lexeme(),
+                "",
+                self.line,
+            )),
+            ',' => Option::from(Token::new(
+                TokenType::Comma,
+                self.get_lexeme(),
+                "",
+                self.line,
+            )),
+            '.' => Option::from(Token::new(TokenType::Dot, self.get_lexeme(), "", self.line)),
+            '-' => Option::from(Token::new(
+                TokenType::Minus,
+                self.get_lexeme(),
+                "",
+                self.line,
+            )),
+            '+' => Option::from(Token::new(
+                TokenType::Plus,
+                self.get_lexeme(),
+                "",
+                self.line,
+            )),
+            ';' => Option::from(Token::new(
+                TokenType::Semicolon,
+                self.get_lexeme(),
+                "",
+                self.line,
+            )),
+            '*' => Option::from(Token::new(
+                TokenType::Star,
+                self.get_lexeme(),
+                "",
+                self.line,
+            )),
             '!' => Option::from(if self.match_char('=') {
-                TokenType::BangEqual
+                Token::new(TokenType::BangEqual, self.get_lexeme(), "", self.line)
             } else {
-                TokenType::Bang
+                Token::new(TokenType::Bang, self.get_lexeme(), "", self.line)
             }),
             '=' => Option::from(if self.match_char('=') {
-                TokenType::EqualEqual
+                Token::new(TokenType::EqualEqual, self.get_lexeme(), "", self.line)
             } else {
-                TokenType::Equal
+                Token::new(TokenType::Equal, self.get_lexeme(), "", self.line)
             }),
             '<' => Option::from(if self.match_char('=') {
-                TokenType::LessEqual
+                Token::new(TokenType::LessEqual, self.get_lexeme(), "", self.line)
             } else {
-                TokenType::Less
+                Token::new(TokenType::Less, self.get_lexeme(), "", self.line)
             }),
             '>' => Option::from(if self.match_char('=') {
-                TokenType::GreaterEqual
+                Token::new(TokenType::GreaterEqual, self.get_lexeme(), "", self.line)
             } else {
-                TokenType::Greater
+                Token::new(TokenType::Greater, self.get_lexeme(), "", self.line)
             }),
             '/' => {
                 if self.match_char('/') {
@@ -75,7 +120,12 @@ impl<'a> Scanner<'a> {
                     }
                     Option::None
                 } else {
-                    Option::from(TokenType::Slash)
+                    Option::from(Token::new(
+                        TokenType::Slash,
+                        self.get_lexeme(),
+                        "",
+                        self.line,
+                    ))
                 }
             }
             // ignore whitespace
@@ -109,17 +159,14 @@ impl<'a> Scanner<'a> {
         ch
     }
 
-    fn add_token(&mut self, token_type: TokenType) {
-        self.add_token_base(token_type, "");
+    fn add_token(&mut self, token: Token<'a>) {
+        self.tokens.push(token)
     }
 
-    fn add_token_base(&mut self, token_type: TokenType, literal: &'a str) {
-        let text = self
-            .source
+    fn get_lexeme(&self) -> &'a str {
+        self.source
             .get(self.start..self.current)
-            .expect("self.start..self.current is not a valid slice of self.source");
-        self.tokens
-            .push(Token::new(token_type, text, literal, self.line))
+            .expect("self.start..self.current is not a valid slice of self.source")
     }
 
     pub fn error(&mut self, message: &str) {
