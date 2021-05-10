@@ -55,8 +55,12 @@ impl<'a> Expr<'a> {
     }
 
     fn parenthesize(name: &'a str, exprs: Vec<Expr>) -> String {
-        println!("{:?}", exprs);
-        name.to_string()
+        let expr_string = exprs
+            .iter()
+            .map(|expr| expr.print())
+            .collect::<Vec<String>>()
+            .join(" ");
+        format!("({} {})", name.to_string(), expr_string)
     }
 }
 
