@@ -1,14 +1,14 @@
 #[macro_use]
 extern crate lazy_static;
 
-mod ast_generator;
 mod interpreter;
+mod java_class_generator;
 
 use std::process::exit;
 use std::{env, io::Result};
 
-use ast_generator::define_ast;
 use interpreter::Lox;
+use java_class_generator::define_ast;
 
 fn main() -> Result<()> {
     let lox = Lox {};
@@ -18,7 +18,7 @@ fn main() -> Result<()> {
         if &args[1] == "gen" {
             define_ast(
                 &args[2],
-                "expr",
+                "Expr",
                 vec![
                     "Binary: Expr left, Token operator, Expr right",
                     "Grouping: Expr expression",
