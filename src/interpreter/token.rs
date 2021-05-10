@@ -3,7 +3,7 @@ use super::token_type::TokenType;
 #[derive(Debug, Clone)]
 pub struct Token<'a> {
     token_type: TokenType,
-    lexeme: &'a str,
+    pub lexeme: &'a str,
     string_literal: Option<&'a str>,
     number_literal: Option<f64>,
     line: i32,

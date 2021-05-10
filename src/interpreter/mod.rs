@@ -1,7 +1,7 @@
-mod expr;
+pub mod expr;
 mod scanner;
-mod token;
-mod token_type;
+pub mod token;
+pub mod token_type;
 
 use std::{
     fs,
