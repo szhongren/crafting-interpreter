@@ -1,8 +1,8 @@
 use super::token_type::TokenType;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub struct Token<'a> {
-    token_type: TokenType,
+    pub token_type: TokenType,
     pub lexeme: &'a str,
     string_literal: Option<&'a str>,
     number_literal: Option<f64>,

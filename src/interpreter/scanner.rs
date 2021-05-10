@@ -62,7 +62,7 @@ impl<'a> Scanner<'a> {
         self.tokens.clone()
     }
 
-    fn is_at_end(&mut self) -> bool {
+    fn is_at_end(&self) -> bool {
         self.current >= self.source.len()
     }
 
@@ -129,11 +129,11 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    fn generate_token_option(&mut self, token_type: TokenType) -> Option<Token<'a>> {
+    fn generate_token_option(&self, token_type: TokenType) -> Option<Token<'a>> {
         Option::from(self.generate_new_token(token_type))
     }
 
-    fn generate_new_token(&mut self, token_type: TokenType) -> Token<'a> {
+    fn generate_new_token(&self, token_type: TokenType) -> Token<'a> {
         Token::new(
             token_type,
             self.get_lexeme(),
@@ -160,7 +160,7 @@ impl<'a> Scanner<'a> {
         ch
     }
 
-    fn get_current_char(&mut self) -> char {
+    fn get_current_char(&self) -> char {
         let ch = self
             .source
             .chars()
@@ -191,7 +191,7 @@ impl<'a> Scanner<'a> {
         true
     }
 
-    fn peek(&mut self) -> char {
+    fn peek(&self) -> char {
         if self.is_at_end() {
             '\0'
         } else {
@@ -260,7 +260,7 @@ impl<'a> Scanner<'a> {
         ))
     }
 
-    fn peek_next(&mut self) -> char {
+    fn peek_next(&self) -> char {
         if self.current + 1 > self.source.len() {
             '\0'
         } else {

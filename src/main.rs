@@ -4,8 +4,8 @@ extern crate lazy_static;
 mod interpreter;
 mod java_class_generator;
 
-use std::process::exit;
 use std::{env, io::Result};
+use std::{process::exit, rc::Rc};
 
 use interpreter::Lox;
 use java_class_generator::define_ast;
@@ -41,17 +41,17 @@ fn main() -> Result<()> {
         match args[1].as_str() {
             "ast" => {
                 let expression = Expr::Binary {
-                    left: Box::from(Expr::Urnary {
+                    left: Rc::from(Expr::Urnary {
                         operator: Token::new(TokenType::Minus, "-", Option::None, Option::None, 1),
-                        right: Box::from(Expr::Literal {
+                        right: Rc::from(Expr::Literal {
                             literal_type: interpreter::expr::LiteralType::NumberLiteral,
                             string_literal: Option::None,
                             number_literal: Option::Some(123 as f64),
                         }),
                     }),
                     operator: Token::new(TokenType::Star, "*", Option::None, Option::None, 1),
-                    right: Box::from(Expr::Grouping {
-                        expression: Box::from(Expr::Literal {
+                    right: Rc::from(Expr::Grouping {
+                        expression: Rc::from(Expr::Literal {
                             literal_type: interpreter::expr::LiteralType::NumberLiteral,
                             string_literal: Option::None,
                             number_literal: Option::Some(45.67),
