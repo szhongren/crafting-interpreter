@@ -1,4 +1,5 @@
 pub mod expr;
+mod parser;
 mod scanner;
 pub mod token;
 pub mod token_type;
