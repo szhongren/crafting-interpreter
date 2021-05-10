@@ -1,5 +1,10 @@
 use super::token::Token;
 
+enum LiteralType {
+    StringLiteral,
+    NumberLiteral,
+}
+
 enum Expr<'a> {
     Binary {
         left: Box<Expr<'a>>,
@@ -10,6 +15,7 @@ enum Expr<'a> {
         expression: Box<Expr<'a>>,
     },
     Literal {
+        literal_type: LiteralType,
         string_literal: &'a str,
         number_literal: f64,
     },
