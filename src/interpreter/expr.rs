@@ -7,6 +7,7 @@ pub enum LiteralType {
     NilLiteral,
 }
 
+// I could use tuple structs here instead
 #[derive(Clone, Debug)]
 pub enum Expr<'a> {
     Binary {

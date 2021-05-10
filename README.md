@@ -78,3 +78,29 @@ binary         → expression operator expression ;
 operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
                | "+"  | "-"  | "*" | "/" ;
 ```
+
+# associativity & precedence from lowest to highest
+
+| Name       | Operators   | Associates |
+| ---------- | ----------- | ---------- |
+| Equality   | `== !=`     | Left       |
+| Comparison | `> >= < <=` | Left       |
+| Term       | `- +`       | Left       |
+| Factor     | `/ \*`      | Left       |
+| Unary      | `! -`       | Right      |
+
+# grammar for lox with precedence and associativity
+
+here, each rule can match expressions at its precedence level or higher
+
+```
+expression     → equality ;
+equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term           → factor ( ( "-" | "+" ) factor )* ;
+factor         → unary ( ( "/" | "*" ) unary )* ; // instead of making it left-recursive, we make it a flat sequence of mults/divs
+unary          → ( "!" | "-" ) unary // recursive urnary
+               | primary ;
+primary        → NUMBER | STRING | "true" | "false" | "nil"
+               | "(" expression ")" ;
+```
