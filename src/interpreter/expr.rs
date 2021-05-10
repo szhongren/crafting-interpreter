@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use super::token::Token;
 
 #[derive(Clone, Debug, Copy)]
@@ -13,12 +11,12 @@ pub enum LiteralType {
 #[derive(Clone, Debug)]
 pub enum Expr<'a> {
     Binary {
-        left: Rc<Expr<'a>>,
+        left: Box<Expr<'a>>,
         operator: Token<'a>,
-        right: Rc<Expr<'a>>,
+        right: Box<Expr<'a>>,
     },
     Grouping {
-        expression: Rc<Expr<'a>>,
+        expression: Box<Expr<'a>>,
     },
     Literal {
         literal_type: LiteralType,
@@ -27,7 +25,7 @@ pub enum Expr<'a> {
     },
     Urnary {
         operator: Token<'a>,
-        right: Rc<Expr<'a>>,
+        right: Box<Expr<'a>>,
     },
 }
 

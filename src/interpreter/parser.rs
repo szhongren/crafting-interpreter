@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use super::token_type::TokenType;
 
 use super::{expr::Expr, token::Token};
@@ -27,9 +25,9 @@ impl<'a> Parser<'a> {
     //         let operator = self.previous();
     //         let right = self.equality();
     //         expr = Expr::Binary {
-    //             left: Rc::from(expr),
+    //             left: Box::from(expr),
     //             operator,
-    //             right: Rc::from(right),
+    //             right: Box::from(right),
     //         };
     //     }
 
