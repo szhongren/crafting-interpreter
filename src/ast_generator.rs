@@ -20,7 +20,7 @@ pub fn define_ast(output_dir: &str, base_name: &str, types: Vec<&str>) -> Result
         let field_list = type_split.next().unwrap().trim();
         define_type(&mut file_buffer, base_name, class_name, field_list)?;
     }
-    file_buffer.write(b"}\n")?;
+    file_buffer.write(b"}\n\n")?;
     Ok(())
 }
 
@@ -38,7 +38,7 @@ fn define_visitor(file_buffer: &mut File, base_name: &str, types: &Vec<&str>) ->
         ))?;
     }
 
-    file_buffer.write(b"  }\n")?;
+    file_buffer.write(b"  }\n\n")?;
     Ok(())
 }
 
@@ -59,10 +59,10 @@ fn define_type(
     // store params in fields
     let fields = field_list.split(", ");
     for field in fields.clone() {
-        let name = field.split(" ").next().unwrap();
+        let name = field.split(" ").nth(1).unwrap();
         file_buffer.write_fmt(format_args!("      this.{} = {};\n", name, name))?;
     }
-    file_buffer.write(b"    }\n")?;
+    file_buffer.write(b"    }\n\n")?;
 
     // visitor pattern
     file_buffer.write(b"    @Override\n")?;
@@ -71,13 +71,13 @@ fn define_type(
         "      return visitor.visit{}{}(this);\n",
         class_name, base_name
     ))?;
-    file_buffer.write(b"    }\n")?;
+    file_buffer.write(b"    }\n\n")?;
 
     // fields
     for field in fields {
         file_buffer.write_fmt(format_args!("    final {};\n", field))?;
     }
 
-    file_buffer.write(b"  }\n")?;
+    file_buffer.write(b"  }\n\n")?;
     Ok(())
 }
