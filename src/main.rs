@@ -40,24 +40,14 @@ fn main() -> Result<()> {
         // lend args[1] to run_file
         match args[1].as_str() {
             "ast" => {
-                let expression = Expr::Binary {
-                    left: Box::from(Expr::Urnary {
-                        operator: Token::new(TokenType::Minus, "-", Option::None, Option::None, 1),
-                        right: Box::from(Expr::Literal {
-                            literal_type: interpreter::expr::LiteralType::NumberLiteral,
-                            string_literal: Option::None,
-                            number_literal: Option::Some(123 as f64),
-                        }),
-                    }),
-                    operator: Token::new(TokenType::Star, "*", Option::None, Option::None, 1),
-                    right: Box::from(Expr::Grouping {
-                        expression: Box::from(Expr::Literal {
-                            literal_type: interpreter::expr::LiteralType::NumberLiteral,
-                            string_literal: Option::None,
-                            number_literal: Option::Some(45.67),
-                        }),
-                    }),
-                };
+                let expression = Expr::Binary(
+                    Box::from(Expr::Urnary(
+                        Token::new(TokenType::Minus, "-", Option::None, Option::None, 1),
+                        Box::from(Expr::NumberLiteral(123 as f64)),
+                    )),
+                    Token::new(TokenType::Star, "*", Option::None, Option::None, 1),
+                    Box::from(Expr::Grouping(Box::from(Expr::NumberLiteral(45.67 as f64)))),
+                );
                 print!("{}", expression.print());
             }
             _ => lox.run_file(&args[1]),

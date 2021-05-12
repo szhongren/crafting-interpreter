@@ -1,55 +1,27 @@
 use super::token::Token;
 
-#[derive(Clone, Debug, Copy)]
-pub enum LiteralType {
-    StringLiteral,
-    NumberLiteral,
-    NilLiteral,
-}
-
 // I could use tuple structs here instead
 #[derive(Clone, Debug)]
 pub enum Expr<'a> {
-    Binary {
-        left: Box<Expr<'a>>,
-        operator: Token<'a>,
-        right: Box<Expr<'a>>,
-    },
-    Grouping {
-        expression: Box<Expr<'a>>,
-    },
-    Literal {
-        literal_type: LiteralType,
-        string_literal: Option<&'a str>,
-        number_literal: Option<f64>,
-    },
-    Urnary {
-        operator: Token<'a>,
-        right: Box<Expr<'a>>,
-    },
+    Binary(Box<Expr<'a>>, Token<'a>, Box<Expr<'a>>),
+    Grouping(Box<Expr<'a>>),
+    StringLiteral(&'a str),
+    NumberLiteral(f64),
+    NilLiteral,
+    Urnary(Token<'a>, Box<Expr<'a>>),
 }
 
 impl<'a> Expr<'a> {
     pub fn print(&self) -> String {
         match self {
-            Expr::Binary {
-                left,
-                operator,
-                right,
-            } => Self::parenthesize(operator.lexeme, vec![(**left).clone(), (**right).clone()]),
-            Expr::Grouping { expression } => {
-                Self::parenthesize("group", vec![(**expression).clone()])
+            Expr::Binary(left, operator, right) => {
+                Self::parenthesize(operator.lexeme, vec![(**left).clone(), (**right).clone()])
             }
-            Expr::Literal {
-                literal_type,
-                string_literal,
-                number_literal,
-            } => match literal_type {
-                LiteralType::NilLiteral => "nil".to_string(),
-                LiteralType::NumberLiteral => number_literal.unwrap().to_string(),
-                LiteralType::StringLiteral => string_literal.unwrap().to_string(),
-            },
-            Expr::Urnary { operator, right } => {
+            Expr::Grouping(expression) => Self::parenthesize("group", vec![(**expression).clone()]),
+            Expr::NilLiteral => "nil".to_string(),
+            Expr::StringLiteral(literal) => literal.to_string(),
+            Expr::NumberLiteral(literal) => literal.to_string(),
+            Expr::Urnary(operator, right) => {
                 Self::parenthesize(operator.lexeme, vec![(**right).clone()])
             }
         }
