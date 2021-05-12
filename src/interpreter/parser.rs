@@ -104,10 +104,16 @@ impl<'a> Parser<'a> {
             Ok(Expr::NumberLiteral(self.previous().number_literal.unwrap()))
         } else if self.match_token_type(vec![TokenType::String]) {
             Ok(Expr::StringLiteral(self.previous().string_literal.unwrap()))
-        } else {
+        } else if self.match_token_type(vec![TokenType::LeftParen]) {
             let expr = self.expression()?;
-            self.consume(TokenType::LeftParen, "Expect ')' after expression.")?;
+            self.consume(TokenType::RightParen, "Expect ')' after expression.")?;
             Ok(Expr::Grouping(Box::new(expr)))
+        } else {
+            Err(format!(
+                "Encountered unknown token \"{}\" with type {:?}",
+                self.peek().lexeme,
+                self.peek().token_type
+            ))
         }
     }
 
@@ -115,7 +121,7 @@ impl<'a> Parser<'a> {
         if self.check(token_type) {
             Ok(self.advance())
         } else {
-            Err(format!("{:?}", self.peek()))
+            Err(format!("{:?}: {}", self.peek(), message))
         }
     }
 
@@ -130,10 +136,10 @@ impl<'a> Parser<'a> {
     }
 
     fn check(&self, token_type: TokenType) -> bool {
-        match self.is_at_end() {
-            true => false,
-            false => self.peek().token_type == token_type,
+        if self.is_at_end() {
+            return false;
         }
+        self.peek().token_type == token_type
     }
 
     fn advance(&self) -> Token {
