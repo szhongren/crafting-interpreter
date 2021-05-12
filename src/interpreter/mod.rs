@@ -33,20 +33,25 @@ impl Lox {
                 .expect("something went wrong");
             // run borrows line
             self.run(line.as_str(), true);
+            print!("\n");
         }
     }
 
     fn run(&self, source: &str, reset_errors: bool) {
         // lifetime of source depends on caller
         let mut scanner = Scanner::new(source);
+
         let tokens = scanner.scan_tokens();
 
         let parser = Parser::new(tokens);
+
         let expr = parser.expression();
+
         match expr {
             Ok(expr) => print!("{}", expr.print()),
             Err(err) => print!("{}", err),
         }
+
         if reset_errors {
             scanner.had_error = false;
             return;
