@@ -5,10 +5,12 @@ use super::token::Token;
 pub enum Expr<'a> {
     Binary(Box<Expr<'a>>, Token<'a>, Box<Expr<'a>>),
     Grouping(Box<Expr<'a>>),
+    Urnary(Token<'a>, Box<Expr<'a>>),
     StringLiteral(&'a str),
     NumberLiteral(f64),
     NilLiteral,
-    Urnary(Token<'a>, Box<Expr<'a>>),
+    TrueLiteral,
+    FalseLiteral,
 }
 
 impl<'a> Expr<'a> {
@@ -21,6 +23,8 @@ impl<'a> Expr<'a> {
             Expr::NilLiteral => "nil".to_string(),
             Expr::StringLiteral(literal) => literal.to_string(),
             Expr::NumberLiteral(literal) => literal.to_string(),
+            Expr::TrueLiteral => "true".to_string(),
+            Expr::FalseLiteral => "false".to_string(),
             Expr::Urnary(operator, right) => {
                 Self::parenthesize(operator.lexeme, vec![(**right).clone()])
             }

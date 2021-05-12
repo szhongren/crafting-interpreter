@@ -4,8 +4,8 @@ use super::token_type::TokenType;
 pub struct Token<'a> {
     pub token_type: TokenType,
     pub lexeme: &'a str,
-    string_literal: Option<&'a str>,
-    number_literal: Option<f64>,
+    pub string_literal: Option<&'a str>,
+    pub number_literal: Option<f64>,
     line: i32,
 }
 
