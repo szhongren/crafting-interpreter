@@ -212,6 +212,7 @@ impl<'a> Scanner<'a> {
             return Option::None;
         }
 
+        // swallow closing quotes
         self.advance();
 
         let string_value = self.get_lexeme();
@@ -242,6 +243,7 @@ impl<'a> Scanner<'a> {
             self.advance();
         }
 
+        // can't do is_numeric because we can only have 1 decimal point in a number
         if self.peek() == '.' && Self::is_digit(self.peek_next()) {
             self.advance();
 
@@ -250,18 +252,18 @@ impl<'a> Scanner<'a> {
             }
         }
 
-        let lexeme = self.get_lexeme();
+        let number_literal = self.get_lexeme();
         Option::from(Token::new(
             TokenType::Number,
-            lexeme,
+            number_literal,
             Option::None,
-            Option::from(lexeme.parse::<f64>().unwrap()),
+            Option::from(number_literal.parse::<f64>().unwrap()),
             self.line,
         ))
     }
 
     fn peek_next(&self) -> char {
-        if self.current + 1 > self.source.len() {
+        if self.current + 1 >= self.source.len() {
             '\0'
         } else {
             self.source

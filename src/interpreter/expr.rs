@@ -20,11 +20,11 @@ impl<'a> Expr<'a> {
                 Self::parenthesize(operator.lexeme, vec![(**left).clone(), (**right).clone()])
             }
             Expr::Grouping(expression) => Self::parenthesize("group", vec![(**expression).clone()]),
-            Expr::NilLiteral => "nil".to_string(),
             Expr::StringLiteral(literal) => literal.to_string(),
             Expr::NumberLiteral(literal) => literal.to_string(),
             Expr::TrueLiteral => "true".to_string(),
             Expr::FalseLiteral => "false".to_string(),
+            Expr::NilLiteral => "nil".to_string(),
             Expr::Urnary(operator, right) => {
                 Self::parenthesize(operator.lexeme, vec![(**right).clone()])
             }
