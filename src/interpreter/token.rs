@@ -6,7 +6,7 @@ pub struct Token<'a> {
     pub lexeme: &'a str,
     pub string_literal: Option<&'a str>,
     pub number_literal: Option<f64>,
-    line: i32,
+    pub line: i32,
 }
 
 impl<'a> Token<'a> {
