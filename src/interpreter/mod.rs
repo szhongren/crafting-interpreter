@@ -10,7 +10,7 @@ use std::{
     process::exit,
 };
 
-use self::scanner::Scanner;
+use self::{parser::Parser, scanner::Scanner};
 
 pub struct Lox {}
 
@@ -39,10 +39,14 @@ impl Lox {
     fn run(&self, source: &str, reset_errors: bool) {
         // lifetime of source depends on caller
         let mut scanner = Scanner::new(source);
-        for token in scanner.scan_tokens() {
-            println!("{:?}", token);
-        }
+        let tokens = scanner.scan_tokens();
 
+        let parser = Parser::new(tokens);
+        let expr = parser.expression();
+        match expr {
+            Ok(expr) => print!("{}", expr.print()),
+            Err(err) => print!("{}", err),
+        }
         if reset_errors {
             scanner.had_error = false;
             return;

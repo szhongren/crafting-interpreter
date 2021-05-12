@@ -4,20 +4,20 @@ use super::token_type::TokenType;
 
 use super::{expr::Expr, token::Token};
 
-struct Parser<'a> {
+pub struct Parser<'a> {
     tokens: RefCell<Vec<Token<'a>>>,
     current: Cell<usize>,
 }
 
 impl<'a> Parser<'a> {
-    fn new(tokens: Vec<Token<'a>>) -> Self {
+    pub fn new(tokens: Vec<Token<'a>>) -> Self {
         Self {
             tokens: RefCell::new(tokens),
             current: Cell::new(0),
         }
     }
 
-    fn expression(&'a self) -> Result<Expr, String> {
+    pub fn expression(&'a self) -> Result<Expr, String> {
         // expression     → equality ;
         self.equality()
     }
@@ -138,7 +138,7 @@ impl<'a> Parser<'a> {
 
     fn advance(&self) -> Token {
         if !self.is_at_end() {
-            self.current.set(self.current.get());
+            self.current.set(self.current.get() + 1);
         }
         self.previous()
     }
