@@ -17,12 +17,12 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn expression(&'a self) -> Result<Expr, String> {
+    pub fn expression(&self) -> Result<Expr, String> {
         // expression     → equality ;
         self.equality()
     }
 
-    fn equality(&'a self) -> Result<Expr, String> {
+    fn equality(&self) -> Result<Expr, String> {
         // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
         let mut expr = self.comparison()?;
 
@@ -35,7 +35,7 @@ impl<'a> Parser<'a> {
         Ok(expr)
     }
 
-    fn comparison(&'a self) -> Result<Expr, String> {
+    fn comparison(&self) -> Result<Expr, String> {
         // comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
         let mut expr = self.term()?;
 
@@ -53,7 +53,7 @@ impl<'a> Parser<'a> {
         Ok(expr)
     }
 
-    fn term(&'a self) -> Result<Expr, String> {
+    fn term(&self) -> Result<Expr, String> {
         // term           → factor ( ( "-" | "+" ) factor )* ;
         let mut expr = self.factor()?;
 
@@ -66,7 +66,7 @@ impl<'a> Parser<'a> {
         Ok(expr)
     }
 
-    fn factor(&'a self) -> Result<Expr, String> {
+    fn factor(&self) -> Result<Expr, String> {
         // factor         → unary ( ( "/" | "*" ) unary )* ; // instead of making it left-recursive, we make it a flat sequence of mults/divs
         let mut expr = self.urnary()?;
 
@@ -79,7 +79,7 @@ impl<'a> Parser<'a> {
         Ok(expr)
     }
 
-    fn urnary(&'a self) -> Result<Expr, String> {
+    fn urnary(&self) -> Result<Expr, String> {
         // unary          → ( "!" | "-" ) unary // recursive urnary
         //                | primary ;
         if self.match_token_type(vec![TokenType::Bang, TokenType::Minus]) {
@@ -91,7 +91,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn primary(&'a self) -> Result<Expr, String> {
+    fn primary(&self) -> Result<Expr, String> {
         // primary        → NUMBER | STRING | "true" | "false" | "nil"
         //                | "(" expression ")" ;
         if self.match_token_type(vec![TokenType::True]) {
@@ -117,7 +117,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn consume(&'a self, token_type: TokenType, message: &str) -> Result<Token, String> {
+    fn consume(&self, token_type: TokenType, message: &str) -> Result<Token, String> {
         if self.check(token_type) {
             Ok(self.advance())
         } else {

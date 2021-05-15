@@ -39,23 +39,32 @@ impl Lox {
 
     fn run(&self, source: &str, reset_errors: bool) {
         // lifetime of source depends on caller
-        let mut scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens();
-        let parser = Parser::new(tokens);
-        let expr = parser.expression();
+        let scanner = Scanner::new(source);
+        let result_tokens = scanner.scan_tokens();
 
+        match result_tokens {
+            Ok(ref tokens) => {
+                print!("{:?}", tokens);
+            }
+
+            Err(ref err) => {
+                print!("{}", err);
+                if !reset_errors {
+                    exit(65);
+                }
+            }
+        }
+
+        let parser = Parser::new(result_tokens.expect("something went very wrong"));
+        let expr = parser.expression();
         match expr {
             Ok(expr) => print!("{}", expr.print()),
-            Err(err) => print!("{}", err),
-        }
-
-        if reset_errors {
-            scanner.had_error = false;
-            return;
-        }
-
-        if scanner.had_error {
-            exit(65);
+            Err(err) => {
+                print!("{}", err);
+                if !reset_errors {
+                    exit(65);
+                }
+            }
         }
     }
 }

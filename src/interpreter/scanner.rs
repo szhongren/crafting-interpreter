@@ -1,6 +1,6 @@
 use super::{token::Token, token_type::TokenType};
 
-use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashMap};
 
 lazy_static! {
     static ref KEYWORDS_MAP: HashMap<&'static str, TokenType> = {
@@ -27,49 +27,50 @@ lazy_static! {
 
 pub struct Scanner<'a> {
     pub source: &'a str,
-    tokens: Vec<Token<'a>>,
-    start: usize,
-    current: usize,
-    line: i32,
-    pub had_error: bool,
+    tokens: RefCell<Vec<Token<'a>>>,
+    start: RefCell<usize>,
+    current: RefCell<usize>,
+    line: RefCell<i32>,
 }
 
 impl<'a> Scanner<'a> {
     pub fn new(source: &'a str) -> Self {
         Self {
             source,
-            tokens: Vec::new(),
-            start: 0,
-            current: 0,
-            line: 1,
-            had_error: false,
+            tokens: RefCell::from(Vec::new()),
+            start: RefCell::from(0),
+            current: RefCell::from(0),
+            line: RefCell::from(1),
         }
     }
 
     // entry point
-    pub fn scan_tokens(&mut self) -> Vec<Token> {
+    pub fn scan_tokens(&'a self) -> Result<Vec<Token<'a>>, String> {
         while !self.is_at_end() {
-            self.start = self.current;
-            self.scan_token();
+            self.start.replace(*self.current.borrow());
+            self.scan_token()?;
         }
-        self.tokens.push(Token::new(
-            TokenType::Eof,
-            "",
-            Option::None,
-            Option::None,
-            self.line,
-        ));
-        self.tokens.clone()
+        self.tokens.replace_with(|tokens| {
+            tokens.push(Token::new(
+                TokenType::Eof,
+                "",
+                Option::None,
+                Option::None,
+                *self.line.borrow(),
+            ));
+            tokens.to_vec()
+        });
+        Ok((*self.tokens.take()).to_vec())
     }
 
     fn is_at_end(&self) -> bool {
-        self.current >= self.source.len()
+        *self.current.borrow() >= self.source.len()
     }
 
     // parser
-    fn scan_token(&mut self) {
+    fn scan_token(&'a self) -> Result<(), String> {
         let ch = self.advance();
-        let token = match ch {
+        let maybe_token = match ch {
             '(' => self.generate_token_option(TokenType::LeftParen),
             ')' => self.generate_token_option(TokenType::RightParen),
             '{' => self.generate_token_option(TokenType::LeftBrace),
@@ -113,50 +114,40 @@ impl<'a> Scanner<'a> {
             // ignore whitespace
             ' ' | '\r' | '\t' => Option::None,
             '\n' => {
-                self.line += 1;
+                self.line.replace_with(|&mut old_line| old_line + 1);
                 Option::None
             }
             '"' => self.string(),
             '0'..='9' => self.number(),
             'a'..='z' | 'A'..='Z' | '_' => self.identifier(),
-            ch => {
-                self.error(format!("unexpected character: {}", ch).as_str());
-                Option::None
-            }
+            _ch => Option::None,
         };
-        if token.is_some() {
-            self.add_token(token.unwrap());
-        }
+
+        if maybe_token.is_some() {
+            self.add_token(maybe_token.unwrap());
+        };
+        Ok(())
     }
 
-    fn generate_token_option(&self, token_type: TokenType) -> Option<Token<'a>> {
+    fn generate_token_option(&self, token_type: TokenType) -> Option<Token> {
         Option::from(self.generate_new_token(token_type))
     }
 
-    fn generate_new_token(&self, token_type: TokenType) -> Token<'a> {
+    fn generate_new_token(&self, token_type: TokenType) -> Token {
         Token::new(
             token_type,
             self.get_lexeme(),
             Option::None,
             Option::None,
-            self.line,
+            *self.line.borrow(),
         )
     }
 
-    // errors
-    pub fn error(&mut self, message: &str) {
-        self.report("", message);
-    }
-
-    fn report(&mut self, location: &str, message: &str) {
-        eprintln!("[line {}] Error{}: {}", self.line, location, message);
-        self.had_error = true;
-    }
-
     // guts
-    fn advance(&mut self) -> char {
+    fn advance(&self) -> char {
         let ch = self.get_current_char();
-        self.current += 1;
+        self.current
+            .replace_with(|&mut old_current| old_current + 1);
         ch
     }
 
@@ -164,22 +155,26 @@ impl<'a> Scanner<'a> {
         let ch = self
             .source
             .chars()
-            .nth(self.current)
+            .nth(*self.current.borrow())
             .expect("self.current is greater than the number of chars in self.source");
         ch
     }
 
-    fn add_token(&mut self, token: Token<'a>) {
-        self.tokens.push(token)
+    fn add_token(&self, token: Token<'a>) {
+        self.tokens.replace_with(|tokens| {
+            tokens.push(token);
+            tokens.to_vec()
+        });
     }
 
-    fn get_lexeme(&self) -> &'a str {
+    fn get_lexeme(&self) -> &str {
+        let range = *self.start.borrow()..*self.current.borrow();
         self.source
-            .get(self.start..self.current)
+            .get(range)
             .expect("self.start..self.current is not a valid slice of self.source")
     }
 
-    fn match_char(&mut self, ch: char) -> bool {
+    fn match_char(&self, ch: char) -> bool {
         if self.is_at_end() {
             return false;
         }
@@ -187,7 +182,8 @@ impl<'a> Scanner<'a> {
             return false;
         }
 
-        self.current += 1;
+        self.current
+            .replace_with(|&mut old_current| old_current + 1);
         true
     }
 
@@ -199,16 +195,16 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    fn string(&mut self) -> Option<Token<'a>> {
+    fn string(&self) -> Option<Token> {
         while self.peek() != '"' && !self.is_at_end() {
             if self.peek() == '\n' {
-                self.line += 1;
+                self.line.replace_with(|&mut old_line| old_line + 1);
             }
             self.advance();
         }
 
         if self.is_at_end() {
-            self.error("Unterminated string");
+            // self.error("Unterminated string");
             return Option::None;
         }
 
@@ -222,7 +218,7 @@ impl<'a> Scanner<'a> {
             string_literal,
             Option::from(string_literal),
             Option::None,
-            self.line,
+            *self.line.borrow(),
         ))
     }
 
@@ -238,7 +234,7 @@ impl<'a> Scanner<'a> {
         Self::is_alpha(ch) || Self::is_digit(ch)
     }
 
-    fn number(&mut self) -> Option<Token<'a>> {
+    fn number(&self) -> Option<Token> {
         while Self::is_digit(self.peek()) {
             self.advance();
         }
@@ -258,22 +254,23 @@ impl<'a> Scanner<'a> {
             number_literal,
             Option::None,
             Option::from(number_literal.parse::<f64>().unwrap()),
-            self.line,
+            *self.line.borrow(),
         ))
     }
 
     fn peek_next(&self) -> char {
-        if self.current + 1 >= self.source.len() {
+        let next_index = *self.current.borrow() + 1;
+        if next_index >= self.source.len() {
             '\0'
         } else {
             self.source
                 .chars()
-                .nth(self.current + 1)
+                .nth(next_index)
                 .expect("self.current + 1 is greater than the number of chars in self.source")
         }
     }
 
-    fn identifier(&mut self) -> Option<Token<'a>> {
+    fn identifier(&self) -> Option<Token> {
         while Self::is_alphanumeric(self.peek()) {
             self.advance();
         }
