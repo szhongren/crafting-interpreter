@@ -16,8 +16,11 @@ impl<'a> Parser<'a> {
             current: Cell::new(0),
         }
     }
+    pub fn parse(&self) -> Result<Expr, String> {
+        self.expression()
+    }
 
-    pub fn expression(&self) -> Result<Expr, String> {
+    fn expression(&self) -> Result<Expr, String> {
         // expression     → equality ;
         self.equality()
     }
@@ -165,5 +168,32 @@ impl<'a> Parser<'a> {
     fn previous(&self) -> Token {
         // returns previous token we just consumed
         self.tokens.to_owned().into_inner()[self.current.get() - 1]
+    }
+
+    fn synchronize(&self) {
+        // discards tokens until we find a statement boundary
+        self.advance();
+
+        while !self.is_at_end() {
+            if self.previous().token_type == TokenType::Semicolon {
+                return;
+            }
+
+            match self.peek().token_type {
+                TokenType::Class
+                | TokenType::Fun
+                | TokenType::Var
+                | TokenType::For
+                | TokenType::If
+                | TokenType::While
+                | TokenType::Print
+                | TokenType::Return => {
+                    return;
+                }
+                _ => (),
+            }
+
+            self.advance();
+        }
     }
 }

@@ -58,7 +58,7 @@ impl Lox {
         }
 
         let parser = Parser::new(result_tokens.expect("something went very wrong"));
-        let expr = parser.expression();
+        let expr = parser.parse();
         match expr {
             Ok(expr) => println!("{}", expr.print()),
             Err(err) => {
