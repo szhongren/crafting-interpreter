@@ -44,11 +44,10 @@ impl Lox {
 
         match result_tokens {
             Ok(ref tokens) => {
-                print!("{:?}", tokens);
+                println!("{:?}", tokens);
             }
-
             Err(ref err) => {
-                print!("{}", err);
+                println!("{}", err);
                 if !reset_errors {
                     exit(65);
                 }
@@ -58,9 +57,9 @@ impl Lox {
         let parser = Parser::new(result_tokens.expect("something went very wrong"));
         let expr = parser.expression();
         match expr {
-            Ok(expr) => print!("{}", expr.print()),
+            Ok(expr) => println!("{}", expr.print()),
             Err(err) => {
-                print!("{}", err);
+                println!("{}", err);
                 if !reset_errors {
                     exit(65);
                 }
