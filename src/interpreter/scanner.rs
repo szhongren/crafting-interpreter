@@ -117,10 +117,15 @@ impl<'a> Scanner<'a> {
                 self.line.replace_with(|&mut old_line| old_line + 1);
                 Option::None
             }
-            '"' => self.string(),
+            '"' => {
+                let result_string = self.string()?;
+                Option::from(result_string)
+            }
             '0'..='9' => self.number(),
             'a'..='z' | 'A'..='Z' | '_' => self.identifier(),
-            _ch => Option::None,
+            _ch => {
+                return Err("unrecognized character".to_string());
+            }
         };
 
         if maybe_token.is_some() {
@@ -195,7 +200,7 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    fn string(&self) -> Option<Token> {
+    fn string(&self) -> Result<Token, String> {
         while self.peek() != '"' && !self.is_at_end() {
             if self.peek() == '\n' {
                 self.line.replace_with(|&mut old_line| old_line + 1);
@@ -204,8 +209,7 @@ impl<'a> Scanner<'a> {
         }
 
         if self.is_at_end() {
-            // self.error("Unterminated string");
-            return Option::None;
+            return Err("Unterminated string".to_string());
         }
 
         // swallow closing quotes
@@ -213,7 +217,7 @@ impl<'a> Scanner<'a> {
 
         let string_value = self.get_lexeme();
         let string_literal = string_value.get(1..string_value.len() - 1).unwrap();
-        Option::from(Token::new(
+        Ok(Token::new(
             TokenType::String,
             string_literal,
             Option::from(string_literal),

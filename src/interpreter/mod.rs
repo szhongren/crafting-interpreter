@@ -51,6 +51,7 @@ impl Lox {
                 if !reset_errors {
                     exit(65);
                 }
+                return;
             }
         }
 
@@ -63,6 +64,7 @@ impl Lox {
                 if !reset_errors {
                     exit(65);
                 }
+                return;
             }
         }
     }
