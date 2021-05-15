@@ -44,7 +44,9 @@ impl Lox {
 
         match result_tokens {
             Ok(ref tokens) => {
-                println!("{:?}", tokens);
+                for token in tokens {
+                    println!("{:?}", token);
+                }
             }
             Err(ref err) => {
                 println!("{}", err);
