@@ -1,19 +1,19 @@
 #[macro_use]
 extern crate lazy_static;
 
-mod interpreter;
 mod java_class_generator;
+mod lox;
 
 use std::process::exit;
 use std::{env, io::Result};
 
-use interpreter::Lox;
 use java_class_generator::define_ast;
+use lox::Lox;
 
-use interpreter::expr::Expr;
-use interpreter::token::Token;
+use lox::expr::Expr;
+use lox::token::Token;
 
-use interpreter::token_type::TokenType;
+use lox::token_type::TokenType;
 
 fn main() -> Result<()> {
     let lox = Lox {};
