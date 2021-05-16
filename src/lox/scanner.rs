@@ -124,7 +124,7 @@ impl<'a> Scanner<'a> {
             '0'..='9' => self.number(),
             'a'..='z' | 'A'..='Z' | '_' => self.identifier(),
             _ch => {
-                return Err("unrecognized character".to_string());
+                return Err(String::from("unrecognized character"));
             }
         };
 
@@ -173,6 +173,7 @@ impl<'a> Scanner<'a> {
     }
 
     fn get_lexeme(&self) -> &str {
+        // can return a &str here because that's what we want, a view of the source, so we don't have to allocate extra memory for the structs to hold the data
         let range = *self.start.borrow()..*self.current.borrow();
         self.source
             .get(range)

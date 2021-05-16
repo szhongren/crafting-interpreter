@@ -37,7 +37,7 @@ impl Display for Value {
                 Value::Number(number_value) => number_value.to_string(),
                 Value::String(string_value) => string_value.to_string(),
                 Value::Bool(bool_value) => bool_value.to_string(),
-                Value::Nil => "nil".to_string(),
+                Value::Nil => String::from("nil"),
             }
         )
     }

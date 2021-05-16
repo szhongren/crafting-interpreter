@@ -104,3 +104,9 @@ unary          → ( "!" | "-" ) unary // recursive urnary
 primary        → NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")" ;
 ```
+
+# Note about &str vs String
+
+prefer using &str for args, and String for return values
+&str works better to save some memory allocation, since it's a pointer to another spot in memory
+String works better when returning, so we don't have to fight the borrow checker
