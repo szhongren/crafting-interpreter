@@ -1,4 +1,5 @@
 pub mod expr;
+mod interpreter;
 mod parser;
 mod scanner;
 pub mod token;
@@ -9,6 +10,8 @@ use std::{
     io::{self, Write},
     process::exit,
 };
+
+use crate::lox::interpreter::Interpreter;
 
 use self::{parser::Parser, scanner::Scanner};
 
@@ -60,7 +63,7 @@ impl Lox {
         let parser = Parser::new(result_tokens.expect("something went very wrong"));
         let expr = parser.parse();
         match expr {
-            Ok(expr) => println!("{}", expr.print()),
+            Ok(ref expr) => println!("{}", expr.print()),
             Err(err) => {
                 println!("{}", err);
                 if !reset_errors {
@@ -69,5 +72,9 @@ impl Lox {
                 return;
             }
         }
+
+        let interpreter = Interpreter::new();
+        let value = interpreter.interpret(expr.expect("failed at interpreting"));
+        println!("{}", value);
     }
 }

@@ -16,6 +16,7 @@ impl<'a> Parser<'a> {
             current: Cell::new(0),
         }
     }
+
     pub fn parse(&self) -> Result<Expr, String> {
         self.expression()
     }
