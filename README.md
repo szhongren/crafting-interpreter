@@ -89,7 +89,7 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 | Factor     | `/ \*`      | Left       |
 | Unary      | `! -`       | Right      |
 
-# grammar for lox with precedence and associativity
+# basic grammar for lox with precedence and associativity
 
 here, each rule can match expressions at its precedence level or higher
 
@@ -110,3 +110,23 @@ primary        → NUMBER | STRING | "true" | "false" | "nil"
 prefer using &str for args, and String for return values
 &str works better to save some memory allocation, since it's a pointer to another spot in memory
 String works better when returning, so we don't have to fight the borrow checker
+
+# more advanced grammar for lox with precedence and associativity
+
+added more rules at the top to handle statements
+
+```
+program        → statement* EOF;
+statement      → exprStatement | printStatement;
+exprStatement  → expression ";";
+printStatement → "print" expression ";";
+expression     → equality ;
+equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term           → factor ( ( "-" | "+" ) factor )* ;
+factor         → unary ( ( "/" | "*" ) unary )* ; // instead of making it left-recursive, we make it a flat sequence of mults/divs
+unary          → ( "!" | "-" ) unary // recursive urnary
+               | primary ;
+primary        → NUMBER | STRING | "true" | "false" | "nil"
+               | "(" expression ")" ;
+```

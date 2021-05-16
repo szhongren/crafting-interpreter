@@ -21,16 +21,23 @@ fn main() -> Result<()> {
     // different from go, first arg is always binary in rust
     if args.len() > 2 {
         match args[1].as_str() {
-            "gen" => define_ast(
-                &args[2],
-                "Expr",
-                vec![
-                    "Binary: Expr left, Token operator, Expr right",
-                    "Grouping: Expr expression",
-                    "Literal: Object value",
-                    "Urnary: Token operator, Expr right",
-                ],
-            )?,
+            "gen" => {
+                define_ast(
+                    &args[2],
+                    "Expr",
+                    vec![
+                        "Binary: Expr left, Token operator, Expr right",
+                        "Grouping: Expr expression",
+                        "Literal: Object value",
+                        "Urnary: Token operator, Expr right",
+                    ],
+                )?;
+                define_ast(
+                    &args[2],
+                    "Stmt",
+                    vec!["Expression: Expr expression", "Print: Expr expression"],
+                )?
+            }
             _ => {
                 println!("Usage: jlox [script]");
                 exit(64)
