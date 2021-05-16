@@ -50,8 +50,8 @@ impl<'a> Interpreter {
         Self {}
     }
 
-    pub fn interpret(&self, expr: Expr) -> Value {
-        self.evaluate(expr).unwrap()
+    pub fn interpret(&self, expr: Expr) -> Result<Value, String> {
+        self.evaluate(expr)
     }
 
     fn evaluate(&self, expr: Expr) -> Result<Value, String> {

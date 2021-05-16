@@ -75,6 +75,15 @@ impl Lox {
 
         let interpreter = Interpreter::new();
         let value = interpreter.interpret(expr.expect("failed at interpreting"));
-        println!("{}", value);
+        match value {
+            Ok(ref value) => println!("{}", value),
+            Err(err) => {
+                println!("{}", err);
+                if !reset_errors {
+                    exit(65);
+                }
+                return;
+            }
+        }
     }
 }
