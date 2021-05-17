@@ -1,6 +1,6 @@
 use std::cell::{Cell, RefCell};
 
-use super::token_type::TokenType;
+use super::{stmt::Stmt, token_type::TokenType};
 
 use super::{expr::Expr, token::Token};
 
@@ -17,13 +17,37 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse(&self) -> Result<Expr, String> {
-        self.expression()
+    pub fn parse(&self) -> Result<Vec<Stmt>, String> {
+        let mut statements = Vec::new();
+        while !self.is_at_end() {
+            statements.push(self.statement()?);
+        }
+        Ok(statements)
+    }
+
+    fn statement(&self) -> Result<Stmt, String> {
+        if self.match_token_type(vec![TokenType::Print]) {
+            Ok(self.print_statement()?)
+        } else {
+            Ok(self.expression_statement()?)
+        }
+    }
+
+    fn expression_statement(&self) -> Result<Stmt, String> {
+        let expression = self.expression()?;
+        self.consume(TokenType::Semicolon, "Expected ';' after value")?;
+        Ok(Stmt::Expression(Box::from(expression)))
+    }
+
+    fn print_statement(&self) -> Result<Stmt, String> {
+        let expression = self.expression()?;
+        self.consume(TokenType::Semicolon, "Expected ';' after value")?;
+        Ok(Stmt::Print(Box::from(expression)))
     }
 
     fn expression(&self) -> Result<Expr, String> {
         // expression     → equality ;
-        self.equality()
+        Ok(self.equality()?)
     }
 
     fn equality(&self) -> Result<Expr, String> {

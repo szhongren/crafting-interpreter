@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use super::{expr::Expr, token::Token, token_type::TokenType};
+use super::{expr::Expr, stmt::Stmt, token::Token, token_type::TokenType};
 
 #[derive(PartialEq)]
 pub enum Value {
@@ -50,8 +50,23 @@ impl<'a> Interpreter {
         Self {}
     }
 
-    pub fn interpret(&self, expr: Expr) -> Result<Value, String> {
-        self.evaluate(expr)
+    pub fn interpret(&self, stmts: Vec<Stmt>) -> Result<(), String> {
+        for stmt in stmts {
+            self.execute(stmt)?;
+        }
+        Ok(())
+    }
+
+    fn execute(&self, stmt: Stmt) -> Result<(), String> {
+        match stmt {
+            Stmt::Expression(expr) => {
+                self.evaluate(*expr)?;
+            }
+            Stmt::Print(expr) => {
+                println!("{}", self.evaluate(*expr)?.to_string());
+            }
+        };
+        Ok(())
     }
 
     fn evaluate(&self, expr: Expr) -> Result<Value, String> {

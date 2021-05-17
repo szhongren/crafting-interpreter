@@ -2,6 +2,7 @@ pub mod expr;
 mod interpreter;
 mod parser;
 mod scanner;
+pub mod stmt;
 pub mod token;
 pub mod token_type;
 
@@ -61,9 +62,9 @@ impl Lox {
         }
 
         let parser = Parser::new(result_tokens.expect("something went very wrong"));
-        let expr = parser.parse();
-        match expr {
-            Ok(ref expr) => println!("{}", expr.print()),
+        let stmts = parser.parse();
+        match stmts {
+            Ok(ref stmts) => println!("{:?}", stmts),
             Err(err) => {
                 println!("{}", err);
                 if !reset_errors {
@@ -74,9 +75,9 @@ impl Lox {
         }
 
         let interpreter = Interpreter::new();
-        let value = interpreter.interpret(expr.expect("failed at interpreting"));
+        let value = interpreter.interpret(stmts.expect("failed at interpreting"));
         match value {
-            Ok(ref value) => println!("{}", value),
+            Ok(_) => (),
             Err(err) => {
                 println!("{}", err);
                 if !reset_errors {

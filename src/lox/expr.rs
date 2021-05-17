@@ -1,6 +1,5 @@
 use super::token::Token;
 
-// I could use tuple structs here instead
 #[derive(Clone, Debug)]
 pub enum Expr<'a> {
     Binary(Box<Expr<'a>>, Token<'a>, Box<Expr<'a>>),
