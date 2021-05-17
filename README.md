@@ -116,8 +116,10 @@ String works better when returning, so we don't have to fight the borrow checker
 added more rules at the top to handle statements
 
 ```
-program        → statement* EOF;
+program        → declaration* EOF;
+declaration    → varDecl | statement;
 statement      → exprStatement | printStatement;
+varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 exprStatement  → expression ";";
 printStatement → "print" expression ";";
 expression     → equality ;
@@ -128,5 +130,5 @@ factor         → unary ( ( "/" | "*" ) unary )* ; // instead of making it left
 unary          → ( "!" | "-" ) unary // recursive urnary
                | primary ;
 primary        → NUMBER | STRING | "true" | "false" | "nil"
-               | "(" expression ")" ;
+               | "(" expression ")" | IDENTIFIER;
 ```

@@ -30,12 +30,17 @@ fn main() -> Result<()> {
                         "Grouping: Expr expression",
                         "Literal: Object value",
                         "Urnary: Token operator, Expr right",
+                        "Variable: Token name",
                     ],
                 )?;
                 define_ast(
                     &args[2],
                     "Stmt",
-                    vec!["Expression: Expr expression", "Print: Expr expression"],
+                    vec![
+                        "Expression: Expr expression",
+                        "Print: Expr expression",
+                        "Var: Token name, Expr initializer",
+                    ],
                 )?
             }
             _ => {
