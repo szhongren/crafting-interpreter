@@ -65,6 +65,9 @@ impl<'a> Interpreter {
             Stmt::Print(expr) => {
                 println!("{}", self.evaluate(*expr)?.to_string());
             }
+            Stmt::Variable(token, expr) => {
+                println!("TEMPORARY");
+            }
         };
         Ok(())
     }
@@ -81,6 +84,7 @@ impl<'a> Interpreter {
             Expr::NilLiteral => Ok(Value::Nil),
             Expr::TrueLiteral => Ok(Value::Bool(true)),
             Expr::FalseLiteral => Ok(Value::Bool(false)),
+            Expr::Variable(_) => Err("TEMPORARY".to_string()),
         }
     }
 

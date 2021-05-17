@@ -10,6 +10,7 @@ pub enum Expr<'a> {
     NilLiteral,
     TrueLiteral,
     FalseLiteral,
+    Variable(Token<'a>),
 }
 
 impl<'a> Expr<'a> {
@@ -27,6 +28,7 @@ impl<'a> Expr<'a> {
             Expr::Urnary(operator, right) => {
                 Self::parenthesize(operator.lexeme, vec![(**right).clone()])
             }
+            Expr::Variable(name) => Self::parenthesize(name.lexeme, vec![]),
         }
     }
 

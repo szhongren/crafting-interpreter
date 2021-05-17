@@ -20,13 +20,53 @@ impl<'a> Parser<'a> {
     pub fn parse(&self) -> Result<Vec<Stmt>, String> {
         let mut statements = Vec::new();
         while !self.is_at_end() {
-            statements.push(self.statement()?);
+            let declaration = self.declaration();
+            if declaration.is_ok() {
+                statements.push(declaration.unwrap());
+            }
         }
         Ok(statements)
     }
 
+    fn declaration(&self) -> Result<Stmt, String> {
+        if self.match_token_types(vec![TokenType::Var]) {
+            match self.var_declaration() {
+                Ok(var_declaration) => Ok(var_declaration),
+                Err(err) => {
+                    self.synchronize();
+                    Err(err)
+                }
+            }
+        } else {
+            match self.statement() {
+                Ok(stmt) => Ok(stmt),
+                Err(err) => {
+                    self.synchronize();
+                    Err(err)
+                }
+            }
+        }
+    }
+
+    fn var_declaration(&self) -> Result<Stmt, String> {
+        let name = self.consume(TokenType::Identifier, "Expected variable name.")?;
+
+        let initializer = if self.match_token_types(vec![TokenType::Equal]) {
+            self.expression()?
+        } else {
+            Expr::NilLiteral
+        };
+
+        self.consume(
+            TokenType::Semicolon,
+            "Expected ';' after variable declaration.",
+        )?;
+
+        Ok(Stmt::Variable(Box::from(name), Box::from(initializer)))
+    }
+
     fn statement(&self) -> Result<Stmt, String> {
-        if self.match_token_type(vec![TokenType::Print]) {
+        if self.match_token_types(vec![TokenType::Print]) {
             Ok(self.print_statement()?)
         } else {
             Ok(self.expression_statement()?)
@@ -54,7 +94,7 @@ impl<'a> Parser<'a> {
         // equality       → comparison ( ( "!=" | "==" ) comparison )* ;
         let mut expr = self.comparison()?;
 
-        while self.match_token_type(vec![TokenType::BangEqual, TokenType::EqualEqual]) {
+        while self.match_token_types(vec![TokenType::BangEqual, TokenType::EqualEqual]) {
             let operator = self.previous();
             let right = self.comparison()?;
             expr = Expr::Binary(Box::from(expr), operator, Box::from(right));
@@ -67,7 +107,7 @@ impl<'a> Parser<'a> {
         // comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
         let mut expr = self.term()?;
 
-        while self.match_token_type(vec![
+        while self.match_token_types(vec![
             TokenType::Greater,
             TokenType::GreaterEqual,
             TokenType::Less,
@@ -85,7 +125,7 @@ impl<'a> Parser<'a> {
         // term           → factor ( ( "-" | "+" ) factor )* ;
         let mut expr = self.factor()?;
 
-        while self.match_token_type(vec![TokenType::Plus, TokenType::Minus]) {
+        while self.match_token_types(vec![TokenType::Plus, TokenType::Minus]) {
             let operator = self.previous();
             let right = self.factor()?;
             expr = Expr::Binary(Box::from(expr), operator, Box::from(right));
@@ -98,7 +138,7 @@ impl<'a> Parser<'a> {
         // factor         → unary ( ( "/" | "*" ) unary )* ; // instead of making it left-recursive, we make it a flat sequence of mults/divs
         let mut expr = self.urnary()?;
 
-        while self.match_token_type(vec![TokenType::Star, TokenType::Slash]) {
+        while self.match_token_types(vec![TokenType::Star, TokenType::Slash]) {
             let operator = self.previous();
             let right = self.urnary()?;
             expr = Expr::Binary(Box::from(expr), operator, Box::from(right));
@@ -110,7 +150,7 @@ impl<'a> Parser<'a> {
     fn urnary(&self) -> Result<Expr, String> {
         // unary          → ( "!" | "-" ) unary // recursive urnary
         //                | primary ;
-        if self.match_token_type(vec![TokenType::Bang, TokenType::Minus]) {
+        if self.match_token_types(vec![TokenType::Bang, TokenType::Minus]) {
             let operator = self.previous();
             let right = self.urnary()?;
             Ok(Expr::Urnary(operator, Box::from(right)))
@@ -122,17 +162,19 @@ impl<'a> Parser<'a> {
     fn primary(&self) -> Result<Expr, String> {
         // primary        → NUMBER | STRING | "true" | "false" | "nil"
         //                | "(" expression ")" ;
-        if self.match_token_type(vec![TokenType::True]) {
+        if self.match_token_types(vec![TokenType::True]) {
             Ok(Expr::TrueLiteral)
-        } else if self.match_token_type(vec![TokenType::False]) {
+        } else if self.match_token_types(vec![TokenType::False]) {
             Ok(Expr::FalseLiteral)
-        } else if self.match_token_type(vec![TokenType::Nil]) {
+        } else if self.match_token_types(vec![TokenType::Nil]) {
             Ok(Expr::NilLiteral)
-        } else if self.match_token_type(vec![TokenType::Number]) {
+        } else if self.match_token_types(vec![TokenType::Number]) {
             Ok(Expr::NumberLiteral(self.previous().number_literal.unwrap()))
-        } else if self.match_token_type(vec![TokenType::String]) {
+        } else if self.match_token_types(vec![TokenType::String]) {
             Ok(Expr::StringLiteral(self.previous().string_literal.unwrap()))
-        } else if self.match_token_type(vec![TokenType::LeftParen]) {
+        } else if self.match_token_types(vec![TokenType::Identifier]) {
+            Ok(Expr::Variable(self.previous()))
+        } else if self.match_token_types(vec![TokenType::LeftParen]) {
             let expr = self.expression()?;
             self.consume(TokenType::RightParen, "expected ')' after expression.")?;
             Ok(Expr::Grouping(Box::new(expr)))
@@ -157,7 +199,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn match_token_type(&self, token_types: Vec<TokenType>) -> bool {
+    fn match_token_types(&self, token_types: Vec<TokenType>) -> bool {
         for token_type in token_types {
             if self.check(token_type) {
                 self.advance();
