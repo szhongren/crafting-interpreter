@@ -1,3 +1,4 @@
+mod environment;
 pub mod expr;
 mod interpreter;
 mod parser;
