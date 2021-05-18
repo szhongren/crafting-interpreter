@@ -75,7 +75,7 @@ impl Lox {
             }
         }
 
-        let interpreter = Interpreter::new();
+        let mut interpreter = Interpreter::new();
         let value = interpreter.interpret(stmts.expect("failed at interpreting"));
         match value {
             Ok(_) => (),

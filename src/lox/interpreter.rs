@@ -1,8 +1,10 @@
-use std::fmt::Display;
+use std::{collections::HashMap, fmt::Display};
 
-use super::{expr::Expr, stmt::Stmt, token::Token, token_type::TokenType};
+use super::{
+    environment::Environment, expr::Expr, stmt::Stmt, token::Token, token_type::TokenType,
+};
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum Value {
     Number(f64),
     String(String),
@@ -43,21 +45,25 @@ impl Display for Value {
     }
 }
 
-pub struct Interpreter {}
+pub struct Interpreter<'a> {
+    environment: Environment<'a>,
+}
 
-impl<'a> Interpreter {
+impl<'a> Interpreter<'a> {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            environment: Environment::new(HashMap::new()),
+        }
     }
 
-    pub fn interpret(&self, stmts: Vec<Stmt>) -> Result<(), String> {
+    pub fn interpret(&mut self, stmts: Vec<Stmt<'a>>) -> Result<(), String> {
         for stmt in stmts {
             self.execute(stmt)?;
         }
         Ok(())
     }
 
-    fn execute(&self, stmt: Stmt) -> Result<(), String> {
+    fn execute(&mut self, stmt: Stmt<'a>) -> Result<(), String> {
         match stmt {
             Stmt::Expression(expr) => {
                 self.evaluate(*expr)?;
@@ -66,7 +72,7 @@ impl<'a> Interpreter {
                 println!("{}", self.evaluate(*expr)?.to_string());
             }
             Stmt::Variable(token, expr) => {
-                println!("TEMPORARY");
+                self.environment.define(token.lexeme, self.evaluate(*expr)?);
             }
         };
         Ok(())
@@ -84,7 +90,7 @@ impl<'a> Interpreter {
             Expr::NilLiteral => Ok(Value::Nil),
             Expr::TrueLiteral => Ok(Value::Bool(true)),
             Expr::FalseLiteral => Ok(Value::Bool(false)),
-            Expr::Variable(_) => Err("TEMPORARY".to_string()),
+            Expr::Variable(token) => Ok(self.environment.get(token.lexeme)?),
         }
     }
 
