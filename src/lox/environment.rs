@@ -16,8 +16,7 @@ impl<'a> Environment<'a> {
     }
 
     pub fn get(&self, name: &str) -> Result<Value, String> {
-        let maybe_value = self.values.get(name);
-        match maybe_value {
+        match self.values.get(name) {
             Some(value) => Ok(value.clone()),
             None => Err(format!("Undefined variable: {}", name)),
         }

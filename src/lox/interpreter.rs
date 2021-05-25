@@ -80,6 +80,7 @@ impl<'a> Interpreter<'a> {
 
     fn evaluate(&self, expr: Expr) -> Result<Value, String> {
         match expr {
+            Expr::Assign(name, value) => Err("TEMPORARY".to_string()),
             Expr::Binary(left, operator, right) => self.binary(*left, operator, *right),
             Expr::Grouping(group_expr) => self.evaluate(*group_expr),
             Expr::Urnary(operator, right) => self.urnary(operator, *right),

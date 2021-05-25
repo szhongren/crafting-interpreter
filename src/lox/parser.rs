@@ -87,6 +87,11 @@ impl<'a> Parser<'a> {
 
     fn expression(&self) -> Result<Expr, String> {
         // expression     → equality ;
+        Ok(self.assigment()?)
+    }
+
+    fn assigment(&self) -> Result<Expr, String> {
+        // expression     → equality ;
         Ok(self.equality()?)
     }
 

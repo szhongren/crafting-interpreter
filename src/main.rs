@@ -26,6 +26,7 @@ fn main() -> Result<()> {
                     &args[2],
                     "Expr",
                     vec![
+                        "Assign: Token name, Expr value",
                         "Binary: Expr left, Token operator, Expr right",
                         "Grouping: Expr expression",
                         "Literal: Object value",
