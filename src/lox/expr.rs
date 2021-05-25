@@ -16,19 +16,19 @@ pub enum Expr<'a> {
 
 impl<'a> Expr<'a> {
     pub fn print(&self) -> String {
-        match *self {
-            Expr::Assign(name, value) => Self::parenthesize(name.lexeme, vec![(*value).clone()]),
+        match self {
+            Expr::Assign(name, value) => Self::parenthesize(name.lexeme, vec![(**value).clone()]),
             Expr::Binary(left, operator, right) => {
-                Self::parenthesize(operator.lexeme, vec![(*left).clone(), (*right).clone()])
+                Self::parenthesize(operator.lexeme, vec![(**left).clone(), (**right).clone()])
             }
-            Expr::Grouping(expression) => Self::parenthesize("group", vec![(*expression).clone()]),
-            Expr::StringLiteral(literal) => String::from(literal),
+            Expr::Grouping(expression) => Self::parenthesize("group", vec![(**expression).clone()]),
+            Expr::StringLiteral(literal) => String::from(*literal),
             Expr::NumberLiteral(literal) => literal.to_string(),
             Expr::TrueLiteral => String::from("true"),
             Expr::FalseLiteral => String::from("false"),
             Expr::NilLiteral => String::from("nil"),
             Expr::Urnary(operator, right) => {
-                Self::parenthesize(operator.lexeme, vec![(*right).clone()])
+                Self::parenthesize(operator.lexeme, vec![(**right).clone()])
             }
             Expr::Variable(name) => Self::parenthesize(name.lexeme, vec![]),
         }

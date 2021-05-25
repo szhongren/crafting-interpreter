@@ -23,12 +23,15 @@ impl<'a> Parser<'a> {
             let declaration = self.declaration();
             if declaration.is_ok() {
                 statements.push(declaration.unwrap());
+            } else {
+                println!("{}", declaration.unwrap_err());
             }
         }
         Ok(statements)
     }
 
     fn declaration(&self) -> Result<Stmt, String> {
+        // declaration    → varDecl | statement;
         if self.match_token_types(vec![TokenType::Var]) {
             match self.var_declaration() {
                 Ok(var_declaration) => Ok(var_declaration),
@@ -49,6 +52,7 @@ impl<'a> Parser<'a> {
     }
 
     fn var_declaration(&self) -> Result<Stmt, String> {
+        // varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
         let name = self.consume(TokenType::Identifier, "Expected variable name.")?;
 
         let initializer = if self.match_token_types(vec![TokenType::Equal]) {
@@ -66,6 +70,7 @@ impl<'a> Parser<'a> {
     }
 
     fn statement(&self) -> Result<Stmt, String> {
+        // statement      → exprStatement | printStatement;
         if self.match_token_types(vec![TokenType::Print]) {
             Ok(self.print_statement()?)
         } else {
@@ -74,25 +79,41 @@ impl<'a> Parser<'a> {
     }
 
     fn expression_statement(&self) -> Result<Stmt, String> {
+        // exprStatement  → expression ";";
         let expression = self.expression()?;
         self.consume(TokenType::Semicolon, "Expected ';' after value")?;
         Ok(Stmt::Expression(Box::from(expression)))
     }
 
     fn print_statement(&self) -> Result<Stmt, String> {
+        // printStatement → "print" expression ";";
         let expression = self.expression()?;
         self.consume(TokenType::Semicolon, "Expected ';' after value")?;
         Ok(Stmt::Print(Box::from(expression)))
     }
 
     fn expression(&self) -> Result<Expr, String> {
-        // expression     → equality ;
-        Ok(self.assigment()?)
+        // expression     → assignment ;
+        Ok(self.assignment()?)
     }
 
-    fn assigment(&self) -> Result<Expr, String> {
-        // expression     → equality ;
-        Ok(self.equality()?)
+    fn assignment(&self) -> Result<Expr, String> {
+        // assignment     → IDENTIFIER "=" assignment | equality ;
+        let expr = self.equality()?;
+        if self.match_token_types(vec![TokenType::Equal]) {
+            let equals = self.previous();
+            let value = self.assignment()?;
+            match expr {
+                Expr::Variable(name) => return Ok(Expr::Assign(name, Box::from(value))),
+                _ => {
+                    return Err(format!(
+                        "Invalid assignment: {:?} {:?} {:?}",
+                        expr, equals, value
+                    ))
+                }
+            }
+        };
+        Ok(expr)
     }
 
     fn equality(&self) -> Result<Expr, String> {
