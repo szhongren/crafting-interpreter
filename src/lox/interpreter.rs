@@ -72,15 +72,20 @@ impl<'a> Interpreter<'a> {
                 println!("{}", self.evaluate(*expr)?.to_string());
             }
             Stmt::Variable(token, expr) => {
-                self.environment.define(token.lexeme, self.evaluate(*expr)?);
+                let eval = self.evaluate(*expr)?;
+                self.environment.define(token.lexeme, eval);
             }
         };
         Ok(())
     }
 
-    fn evaluate(&self, expr: Expr) -> Result<Value, String> {
+    fn evaluate(&mut self, expr: Expr<'a>) -> Result<Value, String> {
         match expr {
-            Expr::Assign(name, value) => Err("TEMPORARY".to_string()),
+            Expr::Assign(name, value) => {
+                let evaluated_value = self.evaluate(*value)?;
+                self.environment.assign(name, evaluated_value.clone())?;
+                Ok(evaluated_value)
+            }
             Expr::Binary(left, operator, right) => self.binary(*left, operator, *right),
             Expr::Grouping(group_expr) => self.evaluate(*group_expr),
             Expr::Urnary(operator, right) => self.urnary(operator, *right),
@@ -95,7 +100,7 @@ impl<'a> Interpreter<'a> {
         }
     }
 
-    fn urnary(&self, operator: Token, right: Expr) -> Result<Value, String> {
+    fn urnary(&mut self, operator: Token, right: Expr<'a>) -> Result<Value, String> {
         let right_value = self.evaluate(right)?;
         match operator.token_type {
             TokenType::Minus => match right_value {
@@ -107,7 +112,12 @@ impl<'a> Interpreter<'a> {
         }
     }
 
-    fn binary(&self, left: Expr, operator: Token, right: Expr) -> Result<Value, String> {
+    fn binary(
+        &mut self,
+        left: Expr<'a>,
+        operator: Token,
+        right: Expr<'a>,
+    ) -> Result<Value, String> {
         let left_value = self.evaluate(left)?;
         let right_value = self.evaluate(right)?;
         match operator.token_type {
