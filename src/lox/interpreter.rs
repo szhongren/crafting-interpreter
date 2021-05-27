@@ -52,7 +52,7 @@ pub struct Interpreter<'a> {
 impl<'a> Interpreter<'a> {
     pub fn new() -> Self {
         Self {
-            environment: Environment::new(HashMap::new()),
+            environment: Environment::new(HashMap::new(), Option::None),
         }
     }
 

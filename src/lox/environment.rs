@@ -2,13 +2,15 @@ use std::collections::HashMap;
 
 use super::{interpreter::Value, token::Token};
 
+#[derive(Clone)]
 pub struct Environment<'a> {
+    enclosing: Option<Box<Environment<'a>>>,
     values: HashMap<&'a str, Value>,
 }
 
 impl<'a> Environment<'a> {
-    pub fn new(values: HashMap<&'a str, Value>) -> Self {
-        Self { values }
+    pub fn new(values: HashMap<&'a str, Value>, enclosing: Option<Box<Environment<'a>>>) -> Self {
+        Self { values, enclosing }
     }
 
     pub fn define(&mut self, name: &'a str, value: Value) {
@@ -18,7 +20,10 @@ impl<'a> Environment<'a> {
     pub fn get(&self, name: &str) -> Result<Value, String> {
         match self.values.get(name) {
             Some(value) => Ok(value.clone()),
-            None => Err(format!("Undefined variable: {}", name)),
+            None => match &self.enclosing {
+                Some(enclosing) => enclosing.get(name),
+                None => Err(format!("me(Undefined variable: {}", name)),
+            },
         }
     }
 
@@ -27,6 +32,13 @@ impl<'a> Environment<'a> {
             self.values.insert(name.lexeme, value);
             return Ok(());
         }
+
+        if self.enclosing.is_some() {
+            unsafe {
+                self.enclosing.as_mut().unwrap().assign(name, value);
+            }
+            return Ok(());
+        };
 
         Err(format!("Undefined variable: '{}'", name.lexeme))
     }
