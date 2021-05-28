@@ -36,9 +36,7 @@ impl<'a> Environment<'a> {
         }
 
         if self.enclosing.is_some() {
-            unsafe {
-                self.enclosing.as_mut().unwrap().assign(name, value);
-            }
+            self.enclosing.as_mut().unwrap().assign(name, value)?;
             return Ok(());
         };
 
