@@ -4,7 +4,7 @@ use super::{
     environment::Environment, expr::Expr, stmt::Stmt, token::Token, token_type::TokenType,
 };
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum Value {
     Number(f64),
     String(String),
@@ -82,8 +82,9 @@ impl<'a> Interpreter<'a> {
         Ok(())
     }
 
-    fn execute_block(&mut self, statements: Vec<Stmt<'a>>, environment: Environment<'a>) {
+    fn execute_block(&mut self, statements: Vec<Stmt<'a>>, mut environment: Environment<'a>) {
         let previous = self.environment.clone();
+        environment.enclosing = Option::from(Box::from(previous.clone()));
         self.environment = environment;
 
         for statement in statements {
