@@ -118,7 +118,8 @@ added more rules at the top to handle statements
 ```
 program        → declaration* EOF;
 declaration    → varDecl | statement;
-statement      → exprStatement | printStatement;
+statement      → exprStatement | printStatement | block;
+block          → "{" declaration* "}";
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 exprStatement  → expression ";";
 printStatement → "print" expression ";";

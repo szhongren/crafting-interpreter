@@ -75,8 +75,24 @@ impl<'a> Interpreter<'a> {
                 let eval = self.evaluate(*expr)?;
                 self.environment.define(token.lexeme, eval);
             }
+            Stmt::Block(statements) => {
+                self.execute_block(statements, Environment::new(HashMap::new(), Option::None));
+            }
         };
         Ok(())
+    }
+
+    fn execute_block(&mut self, statements: Vec<Stmt<'a>>, environment: Environment<'a>) {
+        let previous = self.environment.clone();
+        self.environment = environment;
+
+        for statement in statements {
+            if self.execute(statement).is_err() {
+                break;
+            }
+        }
+
+        self.environment = previous;
     }
 
     fn evaluate(&mut self, expr: Expr<'a>) -> Result<Value, String> {

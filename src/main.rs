@@ -38,6 +38,7 @@ fn main() -> Result<()> {
                     &args[2],
                     "Stmt",
                     vec![
+                        "Block: List<Stmt> statements",
                         "Expression: Expr expression",
                         "Print: Expr expression",
                         "Var: Token name, Expr initializer",
