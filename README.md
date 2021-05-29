@@ -118,11 +118,12 @@ added more rules at the top to handle statements
 ```
 program        → declaration* EOF;
 declaration    → varDecl | statement;
-statement      → exprStatement | printStatement | block;
-block          → "{" declaration* "}";
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
+statement      → exprStatement | ifStatement | printStatement | block;
 exprStatement  → expression ";";
+ifStatement    → "if" "(" expression ")" statement ( "else" statement )?;
 printStatement → "print" expression ";";
+block          → "{" declaration* "}";
 expression     → assignment;
 assignment     → IDENTIFIER "=" assignment | equality ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
