@@ -102,9 +102,9 @@ impl<'a> Parser<'a> {
 
     fn if_statement(&self) -> Result<Stmt, String> {
         // ifStatement    → "if" "(" expression ")" statement ( "else" statement )?;
-        self.consume(TokenType::LeftParen, "Expect '(' after 'if'.");
+        self.consume(TokenType::LeftParen, "Expect '(' after 'if'.")?;
         let condition = self.expression()?;
-        self.consume(TokenType::RightParen, "Expect ')' after 'if' condition.");
+        self.consume(TokenType::RightParen, "Expect ')' after 'if' condition.")?;
 
         let then_branch = self.statement()?;
 
