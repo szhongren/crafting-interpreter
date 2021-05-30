@@ -76,7 +76,13 @@ impl<'a> Interpreter<'a> {
                 self.environment.define(token.lexeme, eval);
             }
             Stmt::Block(statements) => {
-                self.execute_block(statements, Environment::new(HashMap::new(), Option::None));
+                self.execute_block(
+                    statements,
+                    Environment::new(
+                        HashMap::new(),
+                        Option::from(Box::from(self.environment.clone())),
+                    ),
+                );
             }
             Stmt::If(condition, then_branch, maybe_else_branch) => {
                 let eval = self.evaluate(*condition)?;
@@ -86,13 +92,19 @@ impl<'a> Interpreter<'a> {
                     self.execute(else_branch)?;
                 }
             }
+            Stmt::While(condition, body) => {
+                let mut evaluation = self.evaluate(*condition.clone())?;
+                while self.is_truthy(evaluation) {
+                    self.execute(*body.clone())?;
+                    evaluation = self.evaluate(*condition.clone())?;
+                }
+            }
         };
         Ok(())
     }
 
-    fn execute_block(&mut self, statements: Vec<Stmt<'a>>, mut environment: Environment<'a>) {
-        let previous = self.environment.clone();
-        environment.enclosing = Option::from(Box::from(previous.clone()));
+    fn execute_block(&mut self, statements: Vec<Stmt<'a>>, environment: Environment<'a>) {
+        // set current environment to newly constructed environment
         self.environment = environment;
 
         for statement in statements {
@@ -101,7 +113,8 @@ impl<'a> Interpreter<'a> {
             }
         }
 
-        self.environment = previous;
+        // set to original environment with changes
+        self.environment = (**self.environment.enclosing.as_ref().unwrap()).clone();
     }
 
     fn evaluate(&mut self, expr: Expr<'a>) -> Result<Value, String> {

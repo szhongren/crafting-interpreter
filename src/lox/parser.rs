@@ -75,6 +75,8 @@ impl<'a> Parser<'a> {
             Ok(self.if_statement()?)
         } else if self.match_token_types(vec![TokenType::Print]) {
             Ok(self.print_statement()?)
+        } else if self.match_token_types(vec![TokenType::While]) {
+            Ok(self.while_statement()?)
         } else if self.match_token_types(vec![TokenType::LeftBrace]) {
             Ok(Stmt::Block(self.block()?))
         } else {
@@ -126,6 +128,15 @@ impl<'a> Parser<'a> {
         let expression = self.expression()?;
         self.consume(TokenType::Semicolon, "Expected ';' after value")?;
         Ok(Stmt::Print(Box::from(expression)))
+    }
+
+    fn while_statement(&self) -> Result<Stmt, String> {
+        // whileStatement → "while" "(" expression ")" statement;
+        self.consume(TokenType::LeftParen, "Expected '(' after 'while'")?;
+        let condition = self.expression()?;
+        self.consume(TokenType::RightParen, "Expected ')' after 'while'")?;
+        let body = self.statement()?;
+        Ok(Stmt::While(Box::from(condition), Box::from(body)))
     }
 
     fn expression(&self) -> Result<Expr, String> {

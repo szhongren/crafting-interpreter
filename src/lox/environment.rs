@@ -18,7 +18,7 @@ impl<'a> Environment<'a> {
     }
 
     pub fn get(&self, name: &str) -> Result<Value, String> {
-        println!("getting {} from {:?}", name, self);
+        // println!("getting {} from {:?}", name, self);
         match self.values.get(name) {
             Some(value) => Ok(value.clone()),
             None => match &self.enclosing {
@@ -29,7 +29,7 @@ impl<'a> Environment<'a> {
     }
 
     pub fn assign(&mut self, name: Token<'a>, value: Value) -> Result<(), String> {
-        println!("setting {} in {:?} to {:?}", name.lexeme, self, value);
+        // println!("setting {} in {:?} to {:?}", name.lexeme, self, value);
         if self.values.contains_key(&name.lexeme) {
             self.values.insert(name.lexeme, value);
             return Ok(());
