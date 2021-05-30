@@ -119,10 +119,11 @@ added more rules at the top to handle statements
 program        → declaration* EOF;
 declaration    → varDecl | statement;
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
-statement      → exprStatement | ifStatement | printStatement | block;
+statement      → exprStatement | ifStatement | printStatement | whileStatement | block;
 exprStatement  → expression ";";
 ifStatement    → "if" "(" expression ")" statement ( "else" statement )?;
 printStatement → "print" expression ";";
+whileStatement → "while" "(" expression ")" statement;
 block          → "{" declaration* "}";
 expression     → assignment;
 assignment     → IDENTIFIER "=" assignment | equality | logic_or;
