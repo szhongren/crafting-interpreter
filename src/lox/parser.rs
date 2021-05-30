@@ -169,9 +169,14 @@ impl<'a> Parser<'a> {
             body = Stmt::Block(vec![body, Stmt::Expression(Box::from(statement))]);
         }
 
-        if let None = condition {
-            body = Stmt::While(Box::from(Expr::TrueLiteral), Box::from(body));
-        }
+        body = Stmt::While(
+            if let None = condition {
+                Box::from(Expr::TrueLiteral)
+            } else {
+                Box::from(condition.unwrap())
+            },
+            Box::from(body),
+        );
 
         if let Some(statement) = initializer {
             body = Stmt::Block(vec![statement, body]);
