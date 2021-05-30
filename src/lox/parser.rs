@@ -71,7 +71,9 @@ impl<'a> Parser<'a> {
 
     fn statement(&self) -> Result<Stmt, String> {
         // statement      → exprStatement | printStatement;
-        if self.match_token_types(vec![TokenType::Print]) {
+        if self.match_token_types(vec![TokenType::If]) {
+            Ok(self.if_statement()?)
+        } else if self.match_token_types(vec![TokenType::Print]) {
             Ok(self.print_statement()?)
         } else if self.match_token_types(vec![TokenType::LeftBrace]) {
             Ok(Stmt::Block(self.block()?))
@@ -96,6 +98,27 @@ impl<'a> Parser<'a> {
         let expression = self.expression()?;
         self.consume(TokenType::Semicolon, "Expected ';' after value")?;
         Ok(Stmt::Expression(Box::from(expression)))
+    }
+
+    fn if_statement(&self) -> Result<Stmt, String> {
+        // ifStatement    → "if" "(" expression ")" statement ( "else" statement )?;
+        self.consume(TokenType::LeftParen, "Expect '(' after 'if'.");
+        let condition = self.expression()?;
+        self.consume(TokenType::RightParen, "Expect ')' after 'if' condition.");
+
+        let then_branch = self.statement()?;
+
+        let else_branch = if self.match_token_types(vec![TokenType::Else]) {
+            Option::from(self.statement()?)
+        } else {
+            Option::None
+        };
+
+        Ok(Stmt::If(
+            Box::from(condition),
+            Box::from(then_branch),
+            Box::from(else_branch),
+        ))
     }
 
     fn print_statement(&self) -> Result<Stmt, String> {

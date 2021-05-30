@@ -78,6 +78,14 @@ impl<'a> Interpreter<'a> {
             Stmt::Block(statements) => {
                 self.execute_block(statements, Environment::new(HashMap::new(), Option::None));
             }
+            Stmt::If(condition, then_branch, maybe_else_branch) => {
+                let eval = self.evaluate(*condition)?;
+                if self.is_truthy(eval) {
+                    self.execute(*then_branch)?;
+                } else if let Some(else_branch) = *maybe_else_branch {
+                    self.execute(else_branch)?;
+                }
+            }
         };
         Ok(())
     }
