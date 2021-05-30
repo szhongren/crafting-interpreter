@@ -12,6 +12,7 @@ pub enum Expr<'a> {
     TrueLiteral,
     FalseLiteral,
     Variable(Token<'a>),
+    Logical(Box<Expr<'a>>, Token<'a>, Box<Expr<'a>>),
 }
 
 impl<'a> Expr<'a> {
@@ -31,6 +32,9 @@ impl<'a> Expr<'a> {
                 Self::parenthesize(operator.lexeme, vec![(**right).clone()])
             }
             Expr::Variable(name) => Self::parenthesize(name.lexeme, vec![]),
+            Expr::Logical(left, operator, right) => {
+                Self::parenthesize(operator.lexeme, vec![(**left).clone(), (**right).clone()])
+            }
         }
     }
 

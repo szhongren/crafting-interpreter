@@ -134,8 +134,8 @@ impl<'a> Parser<'a> {
     }
 
     fn assignment(&self) -> Result<Expr, String> {
-        // assignment     → IDENTIFIER "=" assignment | equality ;
-        let expr = self.equality()?;
+        // assignment     → IDENTIFIER "=" assignment | logic_or ;
+        let expr = self.or()?;
         if self.match_token_types(vec![TokenType::Equal]) {
             let equals = self.previous();
             let value = self.assignment()?;
@@ -149,6 +149,32 @@ impl<'a> Parser<'a> {
                 }
             }
         };
+        Ok(expr)
+    }
+
+    fn or(&self) -> Result<Expr, String> {
+        // logic_or       → logic_and ( "or" logic_and )*;
+        let mut expr = self.and()?;
+
+        while self.match_token_types(vec![TokenType::Or]) {
+            let operator = self.previous();
+            let right = self.and()?;
+            expr = Expr::Logical(Box::from(expr), operator, Box::from(right));
+        }
+
+        Ok(expr)
+    }
+
+    fn and(&self) -> Result<Expr, String> {
+        // logic_and      → equality ( "and" equality )*;
+        let mut expr = self.equality()?;
+
+        while self.match_token_types(vec![TokenType::And]) {
+            let operator = self.previous();
+            let right = self.equality()?;
+            expr = Expr::Logical(Box::from(expr), operator, Box::from(right));
+        }
+
         Ok(expr)
     }
 
