@@ -123,11 +123,13 @@ impl<'a> Interpreter<'a> {
             Expr::FalseLiteral => Ok(Value::Bool(false)),
             Expr::Variable(token) => Ok(self.environment.get(token.lexeme)?),
             Expr::Logical(left, operator, right) => {
-                let left = self.evaluate(*left)?;
-                if TokenType::Or == operator.token_type && self.is_truthy(left.clone()) {
-                    Ok(left)
-                } else if !self.is_truthy(left.clone()) {
-                    Ok(left)
+                let left_value = self.evaluate(*left)?;
+                if TokenType::Or == operator.token_type && self.is_truthy(left_value.clone()) {
+                    Ok(left_value)
+                } else if TokenType::And == operator.token_type
+                    && !self.is_truthy(left_value.clone())
+                {
+                    Ok(left_value)
                 } else {
                     self.evaluate(*right)
                 }
