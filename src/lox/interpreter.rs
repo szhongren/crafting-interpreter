@@ -71,7 +71,7 @@ impl<'a> Interpreter<'a> {
             Stmt::Print(expr) => {
                 println!("{}", self.evaluate(*expr)?.to_string());
             }
-            Stmt::Variable(token, expr) => {
+            Stmt::VariableDeclaration(token, expr) => {
                 let eval = self.evaluate(*expr)?;
                 self.environment.define(token.lexeme, eval);
             }

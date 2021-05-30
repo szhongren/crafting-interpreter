@@ -7,5 +7,5 @@ pub enum Stmt<'a> {
     If(Box<Expr<'a>>, Box<Stmt<'a>>, Box<Option<Stmt<'a>>>),
     Print(Box<Expr<'a>>),
     While(Box<Expr<'a>>, Box<Stmt<'a>>),
-    Variable(Box<Token<'a>>, Box<Expr<'a>>),
+    VariableDeclaration(Box<Token<'a>>, Box<Expr<'a>>),
 }

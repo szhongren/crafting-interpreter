@@ -8,6 +8,7 @@ pub mod token;
 pub mod token_type;
 
 use std::{
+    borrow::Borrow,
     fs,
     io::{self, Write},
     process::exit,
@@ -15,7 +16,7 @@ use std::{
 
 use crate::lox::interpreter::Interpreter;
 
-use self::{parser::Parser, scanner::Scanner};
+use self::{parser::Parser, scanner::Scanner, stmt::Stmt};
 
 pub struct Lox {}
 
@@ -49,9 +50,9 @@ impl Lox {
 
         match result_tokens {
             Ok(ref tokens) => {
-                for token in tokens {
-                    println!("{:?}", token);
-                }
+                // for token in tokens {
+                //     println!("{:?}", token);
+                // }
             }
             Err(ref err) => {
                 println!("{}", err);
@@ -65,7 +66,11 @@ impl Lox {
         let parser = Parser::new(result_tokens.expect("something went very wrong"));
         let stmts = parser.parse();
         match stmts {
-            Ok(ref stmts) => println!("{:?}", stmts),
+            Ok(ref stmts) => {
+                for stmt in stmts {
+                    self.print_stmt(stmt);
+                }
+            }
             Err(err) => {
                 println!("{}", err);
                 if !reset_errors {
@@ -85,6 +90,36 @@ impl Lox {
                     exit(65);
                 }
                 return;
+            }
+        }
+    }
+
+    fn print_stmt(&self, stmt: &Stmt) {
+        match stmt {
+            Stmt::Block(stmts) => {
+                for stmt in stmts {
+                    self.print_stmt(stmt);
+                }
+            }
+            Stmt::Expression(expr) => {
+                println!("{:?}", expr);
+            }
+            Stmt::If(condition, then_branch, else_branch) => {
+                println!("**IF    **\n{:?}", condition);
+                println!("**THEN  **");
+                self.print_stmt(then_branch);
+                if let Some(statement) = &else_branch.borrow() {
+                    println!("**ELSE  **");
+                    self.print_stmt(statement);
+                }
+            }
+            Stmt::While(condition, body) => {
+                println!("**WHILE **\n{:?}", condition);
+                println!("**DO    **");
+                self.print_stmt(body);
+            }
+            stmt => {
+                println!("{:?}", stmt)
             }
         }
     }

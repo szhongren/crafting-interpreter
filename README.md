@@ -119,8 +119,18 @@ added more rules at the top to handle statements
 program        → declaration* EOF;
 declaration    → varDecl | statement;
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
-statement      → exprStatement | ifStatement | printStatement | whileStatement | block;
+statement      → exprStatement
+               | forStatement
+               | ifStatement
+               | printStatement
+               | whileStatement
+               | block;
 exprStatement  → expression ";";
+forStatement   → "for"
+                 "(" (varDecl | exprStatement | ";")
+                 expression? ";"
+                 expression? ")"
+                 statement;
 ifStatement    → "if" "(" expression ")" statement ( "else" statement )?;
 printStatement → "print" expression ";";
 whileStatement → "while" "(" expression ")" statement;
