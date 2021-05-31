@@ -1,8 +1,33 @@
-use std::{collections::HashMap, fmt::Display};
+use std::{array::IntoIter, collections::HashMap, fmt::Display, iter::FromIterator};
 
 use super::{
     environment::Environment, expr::Expr, stmt::Stmt, token::Token, token_type::TokenType,
 };
+trait Callable {
+    fn arity(&self) -> usize;
+    fn call(&self, interpreter: &Interpreter, arguments: Vec<Value>) -> Result<Value, String>;
+}
+
+#[derive(PartialEq, Clone, Debug)]
+pub struct Function {}
+
+impl Callable for Function {
+    fn arity(&self) -> usize {
+        todo!()
+    }
+
+    fn call(&self, interpreter: &Interpreter, arguments: Vec<Value>) -> Result<Value, String> {
+        if arguments.len() != self.arity() {
+            Err(format!(
+                "Expected {} arguments but got {} arguments",
+                self.arity(),
+                arguments.len()
+            ))
+        } else {
+            Ok(Value::Nil)
+        }
+    }
+}
 
 #[derive(PartialEq, Clone, Debug)]
 pub enum Value {
@@ -10,6 +35,17 @@ pub enum Value {
     String(String),
     Bool(bool),
     Nil,
+    Callable(Function),
+}
+
+impl Value {
+    fn call(&self, interpreter: &Interpreter, arguments: Vec<Value>) -> Result<Value, String> {
+        if let Value::Callable(function) = self {
+            function.call(interpreter, arguments)
+        } else {
+            Err(format!("Value {:?} is not callable", self))
+        }
+    }
 }
 
 impl From<bool> for Value {
@@ -40,6 +76,7 @@ impl Display for Value {
                 Value::String(string_value) => string_value.to_string(),
                 Value::Bool(bool_value) => bool_value.to_string(),
                 Value::Nil => String::from("nil"),
+                Value::Callable(arguments) => format!("callable ({:?})", arguments),
             }
         )
     }
@@ -52,7 +89,10 @@ pub struct Interpreter<'a> {
 impl<'a> Interpreter<'a> {
     pub fn new() -> Self {
         Self {
-            environment: Environment::new(HashMap::new(), Option::None),
+            environment: Environment::new(
+                HashMap::from_iter(IntoIter::new([("clock", Value::Callable(Function {}))])),
+                Option::None,
+            ),
         }
     }
 
@@ -147,7 +187,14 @@ impl<'a> Interpreter<'a> {
                     self.evaluate(*right)
                 }
             }
-            Expr::Call(_, _, _) => Ok(Value::String("Not implemented yet.".to_string())),
+            Expr::Call(callee, _, args) => {
+                let callee = self.evaluate(*callee)?;
+                let mut arguments = Vec::new();
+                for arg in args {
+                    arguments.push(self.evaluate(arg)?);
+                }
+                callee.call(self, arguments)
+            }
         }
     }
 
