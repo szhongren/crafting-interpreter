@@ -87,7 +87,7 @@ impl Interpreter {
         self.environment = previous;
     }
 
-    fn evaluate(&mut self, expr: Expr) -> Result<Value, String> {
+    fn evaluate(&self, expr: Expr) -> Result<Value, String> {
         match expr {
             Expr::Assign(name, value) => {
                 let evaluated_value = self.evaluate(*value)?;
@@ -130,7 +130,7 @@ impl Interpreter {
         }
     }
 
-    fn urnary(&mut self, operator: Token, right: Expr) -> Result<Value, String> {
+    fn urnary(&self, operator: Token, right: Expr) -> Result<Value, String> {
         let right_value = self.evaluate(right)?;
         match operator.token_type {
             TokenType::Minus => match right_value {
@@ -142,7 +142,7 @@ impl Interpreter {
         }
     }
 
-    fn binary(&mut self, left: Expr, operator: Token, right: Expr) -> Result<Value, String> {
+    fn binary(&self, left: Expr, operator: Token, right: Expr) -> Result<Value, String> {
         let left_value = self.evaluate(left)?;
         let right_value = self.evaluate(right)?;
         match operator.token_type {
