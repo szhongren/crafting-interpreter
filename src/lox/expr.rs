@@ -1,40 +1,40 @@
 use super::token::Token;
 
 #[derive(Clone, Debug)]
-pub enum Expr<'a> {
-    Assign(Token<'a>, Box<Expr<'a>>),
-    Binary(Box<Expr<'a>>, Token<'a>, Box<Expr<'a>>),
-    Grouping(Box<Expr<'a>>),
-    Urnary(Token<'a>, Box<Expr<'a>>),
-    StringLiteral(&'a str),
+pub enum Expr {
+    Assign(Token, Box<Expr>),
+    Binary(Box<Expr>, Token, Box<Expr>),
+    Grouping(Box<Expr>),
+    Urnary(Token, Box<Expr>),
+    StringLiteral(String),
     NumberLiteral(f64),
     NilLiteral,
     TrueLiteral,
     FalseLiteral,
-    Variable(Token<'a>),
-    Logical(Box<Expr<'a>>, Token<'a>, Box<Expr<'a>>),
-    Call(Box<Expr<'a>>, Token<'a>, Vec<Expr<'a>>),
+    Variable(Token),
+    Logical(Box<Expr>, Token, Box<Expr>),
+    Call(Box<Expr>, Token, Vec<Expr>),
 }
 
-impl<'a> Expr<'a> {
+impl Expr {
     pub fn print(&self) -> String {
         match self {
-            Expr::Assign(name, value) => Self::parenthesize(name.lexeme, vec![(**value).clone()]),
+            Expr::Assign(name, value) => Self::parenthesize(&name.lexeme, vec![(**value).clone()]),
             Expr::Binary(left, operator, right) => {
-                Self::parenthesize(operator.lexeme, vec![(**left).clone(), (**right).clone()])
+                Self::parenthesize(&operator.lexeme, vec![(**left).clone(), (**right).clone()])
             }
             Expr::Grouping(expression) => Self::parenthesize("group", vec![(**expression).clone()]),
-            Expr::StringLiteral(literal) => String::from(*literal),
+            Expr::StringLiteral(literal) => literal.into(),
             Expr::NumberLiteral(literal) => literal.to_string(),
             Expr::TrueLiteral => String::from("true"),
             Expr::FalseLiteral => String::from("false"),
             Expr::NilLiteral => String::from("nil"),
             Expr::Urnary(operator, right) => {
-                Self::parenthesize(operator.lexeme, vec![(**right).clone()])
+                Self::parenthesize(&operator.lexeme, vec![(**right).clone()])
             }
-            Expr::Variable(name) => Self::parenthesize(name.lexeme, vec![]),
+            Expr::Variable(name) => Self::parenthesize(&name.lexeme, vec![]),
             Expr::Logical(left, operator, right) => {
-                Self::parenthesize(operator.lexeme, vec![(**left).clone(), (**right).clone()])
+                Self::parenthesize(&operator.lexeme, vec![(**left).clone(), (**right).clone()])
             }
             Expr::Call(callee, _, arguments) => {
                 let exprs = vec![(**callee).clone()];
@@ -43,7 +43,7 @@ impl<'a> Expr<'a> {
         }
     }
 
-    fn parenthesize(name: &'a str, exprs: Vec<Expr>) -> String {
+    fn parenthesize(name: &str, exprs: Vec<Expr>) -> String {
         let expr_string = exprs
             .iter()
             .map(|expr| expr.print())

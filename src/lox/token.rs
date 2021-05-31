@@ -1,19 +1,19 @@
 use super::token_type::TokenType;
 
-#[derive(Debug, Clone, PartialEq, Copy)]
-pub struct Token<'a> {
+#[derive(Debug, Clone, PartialEq)]
+pub struct Token {
     pub token_type: TokenType,
-    pub lexeme: &'a str,
-    pub string_literal: Option<&'a str>,
+    pub lexeme: String,
+    pub string_literal: Option<String>,
     pub number_literal: Option<f64>,
     pub line: i32,
 }
 
-impl<'a> Token<'a> {
+impl Token {
     pub fn new(
         token_type: TokenType,
-        lexeme: &'a str,
-        string_literal: Option<&'a str>,
+        lexeme: String,
+        string_literal: Option<String>,
         number_literal: Option<f64>,
         line: i32,
     ) -> Self {

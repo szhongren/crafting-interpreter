@@ -9,28 +9,31 @@ use super::{
     value::{Function, Value},
 };
 
-pub struct Interpreter<'a> {
-    environment: Environment<'a>,
+pub struct Interpreter {
+    environment: Environment,
 }
 
-impl<'a> Interpreter<'a> {
+impl Interpreter {
     pub fn new() -> Self {
         Self {
             environment: Environment::new(
-                HashMap::from_iter(IntoIter::new([("clock", Value::Callable(Function {}))])),
+                HashMap::from_iter(IntoIter::new([(
+                    "clock".to_string(),
+                    Value::Callable(Function {}),
+                )])),
                 Option::None,
             ),
         }
     }
 
-    pub fn interpret(&mut self, stmts: Vec<Stmt<'a>>) -> Result<(), String> {
+    pub fn interpret(&mut self, stmts: Vec<Stmt>) -> Result<(), String> {
         for stmt in stmts {
             self.execute(stmt)?;
         }
         Ok(())
     }
 
-    fn execute(&mut self, stmt: Stmt<'a>) -> Result<(), String> {
+    fn execute(&mut self, stmt: Stmt) -> Result<(), String> {
         match stmt {
             Stmt::Expression(expr) => {
                 self.evaluate(*expr)?;
@@ -70,7 +73,7 @@ impl<'a> Interpreter<'a> {
         Ok(())
     }
 
-    fn execute_block(&mut self, statements: Vec<Stmt<'a>>, environment: Environment<'a>) {
+    fn execute_block(&mut self, statements: Vec<Stmt>, environment: Environment) {
         // set current environment to newly constructed environment
         self.environment = environment;
 
@@ -84,7 +87,7 @@ impl<'a> Interpreter<'a> {
         self.environment = (**self.environment.enclosing.as_ref().unwrap()).clone();
     }
 
-    fn evaluate(&mut self, expr: Expr<'a>) -> Result<Value, String> {
+    fn evaluate(&mut self, expr: Expr) -> Result<Value, String> {
         match expr {
             Expr::Assign(name, value) => {
                 let evaluated_value = self.evaluate(*value)?;
@@ -125,7 +128,7 @@ impl<'a> Interpreter<'a> {
         }
     }
 
-    fn urnary(&mut self, operator: Token, right: Expr<'a>) -> Result<Value, String> {
+    fn urnary(&mut self, operator: Token, right: Expr) -> Result<Value, String> {
         let right_value = self.evaluate(right)?;
         match operator.token_type {
             TokenType::Minus => match right_value {
@@ -137,12 +140,7 @@ impl<'a> Interpreter<'a> {
         }
     }
 
-    fn binary(
-        &mut self,
-        left: Expr<'a>,
-        operator: Token,
-        right: Expr<'a>,
-    ) -> Result<Value, String> {
+    fn binary(&mut self, left: Expr, operator: Token, right: Expr) -> Result<Value, String> {
         let left_value = self.evaluate(left)?;
         let right_value = self.evaluate(right)?;
         match operator.token_type {

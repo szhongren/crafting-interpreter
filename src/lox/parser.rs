@@ -4,13 +4,13 @@ use super::{stmt::Stmt, token_type::TokenType};
 
 use super::{expr::Expr, token::Token};
 
-pub struct Parser<'a> {
-    tokens: RefCell<Vec<Token<'a>>>,
+pub struct Parser {
+    tokens: RefCell<Vec<Token>>,
     current: Cell<usize>,
 }
 
-impl<'a> Parser<'a> {
-    pub fn new(tokens: Vec<Token<'a>>) -> Self {
+impl Parser {
+    pub fn new(tokens: Vec<Token>) -> Self {
         Self {
             tokens: RefCell::new(tokens),
             current: Cell::new(0),
@@ -420,12 +420,12 @@ impl<'a> Parser<'a> {
 
     fn peek(&self) -> Token {
         // returns current token we haven't consumed yet
-        self.tokens.to_owned().into_inner()[self.current.get()]
+        self.tokens.to_owned().into_inner()[self.current.get()].clone()
     }
 
     fn previous(&self) -> Token {
         // returns previous token we just consumed
-        self.tokens.to_owned().into_inner()[self.current.get() - 1]
+        self.tokens.to_owned().into_inner()[self.current.get() - 1].clone()
     }
 
     fn synchronize(&self) {

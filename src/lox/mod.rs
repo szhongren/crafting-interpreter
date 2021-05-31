@@ -46,7 +46,7 @@ impl Lox {
 
     fn run(&self, source: &str, reset_errors: bool) {
         // lifetime of source depends on caller
-        let scanner = Scanner::new(source);
+        let mut scanner = Scanner::new(source);
         let result_tokens = scanner.scan_tokens();
 
         match result_tokens {
