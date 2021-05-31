@@ -201,30 +201,16 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    fn string(&self) -> Result<Token, String> {
-        while self.peek() != '"' && !self.is_at_end() {
-            if self.peek() == '\n' {
-                self.line.replace_with(|&mut old_line| old_line + 1);
-            }
-            self.advance();
+    fn peek_next(&self) -> char {
+        let next_index = *self.current.borrow() + 1;
+        if next_index >= self.source.len() {
+            '\0'
+        } else {
+            self.source
+                .chars()
+                .nth(next_index)
+                .expect("self.current + 1 is greater than the number of chars in self.source")
         }
-
-        if self.is_at_end() {
-            return Err("Unterminated string".to_string());
-        }
-
-        // swallow closing quotes
-        self.advance();
-
-        let string_value = self.get_lexeme();
-        let string_literal = string_value.get(1..string_value.len() - 1).unwrap();
-        Ok(Token::new(
-            TokenType::String,
-            string_literal,
-            Option::from(string_literal),
-            Option::None,
-            *self.line.borrow(),
-        ))
     }
 
     fn is_digit(ch: char) -> bool {
@@ -263,16 +249,30 @@ impl<'a> Scanner<'a> {
         ))
     }
 
-    fn peek_next(&self) -> char {
-        let next_index = *self.current.borrow() + 1;
-        if next_index >= self.source.len() {
-            '\0'
-        } else {
-            self.source
-                .chars()
-                .nth(next_index)
-                .expect("self.current + 1 is greater than the number of chars in self.source")
+    fn string(&self) -> Result<Token, String> {
+        while self.peek() != '"' && !self.is_at_end() {
+            if self.peek() == '\n' {
+                self.line.replace_with(|&mut old_line| old_line + 1);
+            }
+            self.advance();
         }
+
+        if self.is_at_end() {
+            return Err("Unterminated string".to_string());
+        }
+
+        // swallow closing quotes
+        self.advance();
+
+        let string_value = self.get_lexeme();
+        let string_literal = string_value.get(1..string_value.len() - 1).unwrap();
+        Ok(Token::new(
+            TokenType::String,
+            string_literal,
+            Option::from(string_literal),
+            Option::None,
+            *self.line.borrow(),
+        ))
     }
 
     fn identifier(&self) -> Option<Token> {

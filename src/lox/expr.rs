@@ -1,5 +1,3 @@
-use crate::lox::expr;
-
 use super::token::Token;
 
 #[derive(Clone, Debug)]

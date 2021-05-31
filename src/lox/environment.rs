@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::{interpreter::Value, token::Token};
+use super::{token::Token, value::Value};
 
 #[derive(Clone, Debug)]
 pub struct Environment<'a> {
