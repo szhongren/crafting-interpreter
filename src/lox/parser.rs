@@ -2,7 +2,7 @@ use std::cell::{Cell, RefCell};
 
 use super::{stmt::Stmt, token_type::TokenType};
 
-use super::{expr::Expr, token::Token};
+use super::{expr::Expr, token::Literal, token::Token};
 
 pub struct Parser {
     tokens: RefCell<Vec<Token>>,
@@ -360,9 +360,17 @@ impl Parser {
         } else if self.match_token_types(vec![TokenType::Nil]) {
             Ok(Expr::NilLiteral)
         } else if self.match_token_types(vec![TokenType::Number]) {
-            Ok(Expr::NumberLiteral(self.previous().number_literal.unwrap()))
+            if let Literal::Number(number_literal) = self.previous().literal.unwrap() {
+                Ok(Expr::NumberLiteral(number_literal))
+            } else {
+                Err("Expected number literal".to_string())
+            }
         } else if self.match_token_types(vec![TokenType::String]) {
-            Ok(Expr::StringLiteral(self.previous().string_literal.unwrap()))
+            if let Literal::String(string_literal) = self.previous().literal.unwrap() {
+                Ok(Expr::StringLiteral(string_literal))
+            } else {
+                Err("Expected string literal".to_string())
+            }
         } else if self.match_token_types(vec![TokenType::Identifier]) {
             Ok(Expr::Variable(self.previous()))
         } else if self.match_token_types(vec![TokenType::LeftParen]) {

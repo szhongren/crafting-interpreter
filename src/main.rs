@@ -60,22 +60,10 @@ fn main() -> Result<()> {
             "ast" => {
                 let expression = Expr::Binary(
                     Box::from(Expr::Urnary(
-                        Token::new(
-                            TokenType::Minus,
-                            "-".to_string(),
-                            Option::None,
-                            Option::None,
-                            1,
-                        ),
+                        Token::new(TokenType::Minus, "-".to_string(), Option::None, 1),
                         Box::from(Expr::NumberLiteral(123 as f64)),
                     )),
-                    Token::new(
-                        TokenType::Star,
-                        "*".to_string(),
-                        Option::None,
-                        Option::None,
-                        1,
-                    ),
+                    Token::new(TokenType::Star, "*".to_string(), Option::None, 1),
                     Box::from(Expr::Grouping(Box::from(Expr::NumberLiteral(45.67 as f64)))),
                 );
                 print!("{}", expression.print());

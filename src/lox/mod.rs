@@ -51,9 +51,9 @@ impl Lox {
 
         match result_tokens {
             Ok(ref tokens) => {
-                // for token in tokens {
-                //     println!("{:?}", token);
-                // }
+                for token in tokens {
+                    println!("{:?}", token);
+                }
             }
             Err(ref err) => {
                 println!("{}", err);
@@ -83,14 +83,11 @@ impl Lox {
 
         let mut interpreter = Interpreter::new();
         let value = interpreter.interpret(stmts.expect("failed at interpreting"));
-        match value {
-            Ok(_) => (),
-            Err(err) => {
-                println!("{}", err);
-                if !reset_errors {
-                    exit(65);
-                }
-                return;
+
+        if let Err(err) = value {
+            println!("{}", err);
+            if !reset_errors {
+                exit(65);
             }
         }
     }

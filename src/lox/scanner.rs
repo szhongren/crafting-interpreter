@@ -1,4 +1,7 @@
-use super::{token::Token, token_type::TokenType};
+use super::{
+    token::{Literal, Token},
+    token_type::TokenType,
+};
 
 use std::collections::HashMap;
 
@@ -53,7 +56,6 @@ impl<'a> Scanner<'a> {
         self.tokens.push(Token::new(
             TokenType::Eof,
             "".to_string(),
-            Option::None,
             Option::None,
             self.line,
         ));
@@ -136,13 +138,7 @@ impl<'a> Scanner<'a> {
     }
 
     fn generate_new_token(&self, token_type: TokenType) -> Token {
-        Token::new(
-            token_type,
-            self.get_lexeme(),
-            Option::None,
-            Option::None,
-            self.line,
-        )
+        Token::new(token_type, self.get_lexeme(), Option::None, self.line)
     }
 
     // guts
@@ -235,8 +231,7 @@ impl<'a> Scanner<'a> {
         Option::from(Token::new(
             TokenType::Number,
             number_literal.clone(),
-            Option::None,
-            Option::from(number_literal.parse::<f64>().unwrap()),
+            Option::from(Literal::Number(number_literal.parse::<f64>().unwrap())),
             self.line,
         ))
     }
@@ -260,8 +255,7 @@ impl<'a> Scanner<'a> {
         Ok(Token::new(
             TokenType::String,
             string_value.clone(),
-            Option::from(string_value),
-            Option::None,
+            Option::from(Literal::String(string_value)),
             self.line,
         ))
     }
