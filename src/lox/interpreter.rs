@@ -19,7 +19,7 @@ impl Interpreter {
             environment: Environment::new(
                 HashMap::from_iter(IntoIter::new([(
                     "clock".to_string(),
-                    Value::Callable(Function {}),
+                    Value::Callable(Function::new(0)),
                 )])),
                 Option::None,
             ),

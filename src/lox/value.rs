@@ -8,23 +8,30 @@ pub trait Callable {
 }
 
 #[derive(PartialEq, Clone, Debug)]
-pub struct Function {}
+pub struct Function {
+    pub arity: usize,
+}
+
+impl Function {
+    pub fn new(arity: usize) -> Self {
+        Self { arity }
+    }
+}
 
 impl Callable for Function {
     fn arity(&self) -> usize {
-        todo!()
+        self.arity
     }
 
     fn call(&self, interpreter: &Interpreter, arguments: Vec<Value>) -> Result<Value, String> {
         if arguments.len() != self.arity() {
-            Err(format!(
+            return Err(format!(
                 "Expected {} arguments but got {} arguments",
                 self.arity(),
                 arguments.len()
-            ))
-        } else {
-            Ok(Value::Nil)
+            ));
         }
+        Ok(Value::Nil)
     }
 }
 

@@ -23,7 +23,7 @@ impl Environment {
             Some(value) => Ok(value.clone()),
             None => match &self.enclosing {
                 Some(enclosing) => enclosing.get(name),
-                None => Err(format!("me(Undefined variable: {}", name)),
+                None => Err(format!("Undefined variable: {}", name)),
             },
         }
     }
