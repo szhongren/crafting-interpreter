@@ -1,4 +1,4 @@
-use std::{array::IntoIter, collections::HashMap, iter::FromIterator};
+use std::{array::IntoIter, cell::RefCell, collections::HashMap, iter::FromIterator, rc::Rc};
 
 use super::{
     environment::Environment,
@@ -10,19 +10,22 @@ use super::{
 };
 
 pub struct Interpreter {
-    environment: Environment,
+    globals: Rc<RefCell<Environment>>,
+    environment: Rc<RefCell<Environment>>,
 }
 
 impl Interpreter {
     pub fn new() -> Self {
+        let env = Rc::from(RefCell::from(Environment::new(
+            HashMap::from_iter(IntoIter::new([(
+                "clock".to_string(),
+                Value::Callable(Function::new(0)),
+            )])),
+            Option::None,
+        )));
         Self {
-            environment: Environment::new(
-                HashMap::from_iter(IntoIter::new([(
-                    "clock".to_string(),
-                    Value::Callable(Function::new(0)),
-                )])),
-                Option::None,
-            ),
+            environment: Rc::clone(&env),
+            globals: env,
         }
     }
 
@@ -43,16 +46,10 @@ impl Interpreter {
             }
             Stmt::VariableDeclaration(token, expr) => {
                 let eval = self.evaluate(*expr)?;
-                self.environment.define(token.lexeme, eval);
+                self.environment.borrow_mut().define(token.lexeme, eval);
             }
             Stmt::Block(statements) => {
-                self.execute_block(
-                    statements,
-                    Environment::new(
-                        HashMap::new(),
-                        Option::from(Box::from(self.environment.clone())),
-                    ),
-                );
+                self.execute_block(statements);
             }
             Stmt::If(condition, then_branch, maybe_else_branch) => {
                 let eval = self.evaluate(*condition)?;
@@ -73,9 +70,12 @@ impl Interpreter {
         Ok(())
     }
 
-    fn execute_block(&mut self, statements: Vec<Stmt>, environment: Environment) {
+    fn execute_block(&mut self, statements: Vec<Stmt>) {
         // set current environment to newly constructed environment
-        self.environment = environment;
+        let previous = self.environment.clone();
+        let new_environment =
+            Environment::new(HashMap::new(), Option::from(self.environment.clone()));
+        self.environment = Rc::from(RefCell::from(new_environment));
 
         for statement in statements {
             if self.execute(statement).is_err() {
@@ -84,14 +84,16 @@ impl Interpreter {
         }
 
         // set to original environment with changes
-        self.environment = (**self.environment.enclosing.as_ref().unwrap()).clone();
+        self.environment = previous;
     }
 
     fn evaluate(&mut self, expr: Expr) -> Result<Value, String> {
         match expr {
             Expr::Assign(name, value) => {
                 let evaluated_value = self.evaluate(*value)?;
-                self.environment.assign(name, evaluated_value.clone())?;
+                self.environment
+                    .borrow_mut()
+                    .assign(name, evaluated_value.clone())?;
                 Ok(evaluated_value)
             }
             Expr::Binary(left, operator, right) => self.binary(*left, operator, *right),
@@ -104,7 +106,7 @@ impl Interpreter {
             Expr::NilLiteral => Ok(Value::Nil),
             Expr::TrueLiteral => Ok(Value::Bool(true)),
             Expr::FalseLiteral => Ok(Value::Bool(false)),
-            Expr::Variable(token) => Ok(self.environment.get(token.lexeme)?),
+            Expr::Variable(token) => Ok(self.environment.borrow().get(token.lexeme)?),
             Expr::Logical(left, operator, right) => {
                 let left_value = self.evaluate(*left)?;
                 if TokenType::Or == operator.token_type && self.is_truthy(left_value.clone()) {

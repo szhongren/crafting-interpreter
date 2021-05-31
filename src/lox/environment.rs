@@ -1,15 +1,18 @@
-use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use super::{token::Token, value::Value};
 
 #[derive(Clone, Debug)]
 pub struct Environment {
-    pub enclosing: Option<Box<Environment>>,
+    pub enclosing: Option<Rc<RefCell<Environment>>>,
     values: HashMap<String, Value>,
 }
 
 impl Environment {
-    pub fn new(values: HashMap<String, Value>, enclosing: Option<Box<Environment>>) -> Self {
+    pub fn new(
+        values: HashMap<String, Value>,
+        enclosing: Option<Rc<RefCell<Environment>>>,
+    ) -> Self {
         Self { values, enclosing }
     }
 
@@ -22,7 +25,7 @@ impl Environment {
         match self.values.get(&name) {
             Some(value) => Ok(value.clone()),
             None => match &self.enclosing {
-                Some(enclosing) => enclosing.get(name),
+                Some(enclosing) => enclosing.borrow().get(name),
                 None => Err(format!("Undefined variable: {}", name)),
             },
         }
@@ -36,7 +39,11 @@ impl Environment {
         }
 
         if self.enclosing.is_some() {
-            self.enclosing.as_mut().unwrap().assign(name, value)?;
+            self.enclosing
+                .as_ref()
+                .unwrap()
+                .borrow_mut()
+                .assign(name, value)?;
             return Ok(());
         };
 
