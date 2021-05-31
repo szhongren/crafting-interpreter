@@ -147,6 +147,7 @@ impl<'a> Interpreter<'a> {
                     self.evaluate(*right)
                 }
             }
+            Expr::Call(_, _, _) => Ok(Value::String("Not implemented yet.".to_string())),
         }
     }
 

@@ -203,7 +203,7 @@ impl<'a> Parser<'a> {
 
     fn expression(&self) -> Result<Expr, String> {
         // expression     → assignment ;
-        Ok(self.assignment()?)
+        self.assignment()
     }
 
     fn assignment(&self) -> Result<Expr, String> {
@@ -310,14 +310,44 @@ impl<'a> Parser<'a> {
 
     fn urnary(&self) -> Result<Expr, String> {
         // unary          → ( "!" | "-" ) unary // recursive urnary
-        //                | primary ;
+        //                | call ;
         if self.match_token_types(vec![TokenType::Bang, TokenType::Minus]) {
             let operator = self.previous();
             let right = self.urnary()?;
             Ok(Expr::Urnary(operator, Box::from(right)))
         } else {
-            self.primary()
+            self.call()
         }
+    }
+
+    fn call(&self) -> Result<Expr, String> {
+        // call           → primary ( "(" arguments? ")" )* ;
+        let mut expr = self.primary()?;
+        loop {
+            if self.match_token_types(vec![TokenType::LeftParen]) {
+                let mut arguments = Vec::new();
+
+                if !self.check(TokenType::RightParen) {
+                    while {
+                        if arguments.len() >= 255 {
+                            return Err(format!(
+                                "Can't have more than 255 arguments: {:?}",
+                                self.peek()
+                            ));
+                        }
+                        arguments.push(self.expression()?);
+                        self.match_token_types(vec![TokenType::Comma])
+                    } {}
+                }
+
+                let paren = self.consume(TokenType::RightParen, "Expected ')' after arguments")?;
+
+                expr = Expr::Call(Box::from(expr), paren, arguments);
+            } else {
+                break;
+            }
+        }
+        Ok(expr)
     }
 
     fn primary(&self) -> Result<Expr, String> {

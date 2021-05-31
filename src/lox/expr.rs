@@ -1,3 +1,5 @@
+use crate::lox::expr;
+
 use super::token::Token;
 
 #[derive(Clone, Debug)]
@@ -13,6 +15,7 @@ pub enum Expr<'a> {
     FalseLiteral,
     Variable(Token<'a>),
     Logical(Box<Expr<'a>>, Token<'a>, Box<Expr<'a>>),
+    Call(Box<Expr<'a>>, Token<'a>, Vec<Expr<'a>>),
 }
 
 impl<'a> Expr<'a> {
@@ -34,6 +37,10 @@ impl<'a> Expr<'a> {
             Expr::Variable(name) => Self::parenthesize(name.lexeme, vec![]),
             Expr::Logical(left, operator, right) => {
                 Self::parenthesize(operator.lexeme, vec![(**left).clone(), (**right).clone()])
+            }
+            Expr::Call(callee, _, arguments) => {
+                let exprs = vec![(**callee).clone()];
+                Self::parenthesize("\\", [exprs, arguments.to_vec()].concat())
             }
         }
     }
