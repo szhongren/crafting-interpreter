@@ -8,6 +8,15 @@ pub enum Literal {
     Number(f64),
 }
 
+impl Display for Literal {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Literal::String(literal) => write!(f, "(string - {}", literal),
+            Literal::Number(literal) => write!(f, "(number - {}", literal),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Token {
     pub token_type: TokenType,
@@ -34,14 +43,5 @@ impl Display for Token {
             "(token type: {:?}, lexeme: '{}', literal: {:?}, line: {})",
             self.token_type, self.lexeme, self.literal, self.line,
         )
-    }
-}
-
-impl Display for Literal {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Literal::String(literal) => write!(f, "(string - {}", literal),
-            Literal::Number(literal) => write!(f, "(string - {}", literal),
-        }
     }
 }

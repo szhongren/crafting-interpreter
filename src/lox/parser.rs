@@ -216,7 +216,7 @@ impl Parser {
                 Expr::Variable(name) => return Ok(Expr::Assign(name, Box::from(value))),
                 _ => {
                     return Err(format!(
-                        "Invalid assignment: {:?} {:?} {:?}",
+                        "Invalid assignment: {} {:?} {}",
                         expr, equals, value
                     ))
                 }
