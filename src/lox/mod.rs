@@ -52,7 +52,7 @@ impl Lox {
         match result_tokens {
             Ok(ref tokens) => {
                 for token in tokens {
-                    println!("{:?}", token);
+                    println!("{}", token);
                 }
             }
             Err(ref err) => {
@@ -100,10 +100,10 @@ impl Lox {
                 }
             }
             Stmt::Expression(expr) => {
-                println!("{:?}", expr);
+                println!("{}", expr);
             }
             Stmt::If(condition, then_branch, else_branch) => {
-                println!("**IF    **\n{:?}", condition);
+                println!("**IF    **\n{}", condition);
                 println!("**THEN  **");
                 self.print_stmt(then_branch);
                 if let Some(statement) = &else_branch.borrow() {
@@ -112,7 +112,7 @@ impl Lox {
                 }
             }
             Stmt::While(condition, body) => {
-                println!("**WHILE **\n{:?}", condition);
+                println!("**WHILE **\n{}", condition);
                 println!("**DO    **");
                 self.print_stmt(body);
             }

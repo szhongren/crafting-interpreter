@@ -66,7 +66,7 @@ fn main() -> Result<()> {
                     Token::new(TokenType::Star, "*".to_string(), Option::None, 1),
                     Box::from(Expr::Grouping(Box::from(Expr::NumberLiteral(45.67 as f64)))),
                 );
-                print!("{}", expression.print());
+                print!("{}", expression);
             }
             _ => lox.run_file(&args[1]),
         }

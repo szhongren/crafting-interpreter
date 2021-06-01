@@ -4,7 +4,7 @@ use super::{token::Token, value::Value};
 
 #[derive(Clone, Debug)]
 pub struct Environment {
-    pub enclosing: Option<Rc<RefCell<Environment>>>,
+    enclosing: Option<Rc<RefCell<Environment>>>,
     values: HashMap<String, Value>,
 }
 
@@ -40,7 +40,7 @@ impl Environment {
 
         if self.enclosing.is_some() {
             self.enclosing
-                .as_ref()
+                .as_deref()
                 .unwrap()
                 .borrow_mut()
                 .assign(name, value)?;
