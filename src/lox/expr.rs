@@ -29,22 +29,20 @@ impl Display for Expr {
             Expr::Urnary(operator, right) => write!(f, "(urnary {} {})", operator, right),
             Expr::StringLiteral(literal) => write!(f, "(literal {})", literal),
             Expr::NumberLiteral(literal) => write!(f, "(literal {})", literal),
-            Expr::NilLiteral => write!(f, "nil"),
-            Expr::TrueLiteral => write!(f, "true"),
-            Expr::FalseLiteral => write!(f, "false"),
+            Expr::NilLiteral => write!(f, "(literal nil)"),
+            Expr::TrueLiteral => write!(f, "(literal true)"),
+            Expr::FalseLiteral => write!(f, "(literal false)"),
             Expr::Variable(name) => write!(f, "(variable {})", name.lexeme),
             Expr::Logical(left, operator, right) => {
                 write!(f, "(binary {} {} {})", left, operator, right)
             }
-            Expr::Call(callee, _, arguments) => write!(f, ""),
+            Expr::Call(callee, _, arguments) => {
+                write!(f, "(call {}", callee)?;
+                for argument in arguments {
+                    write!(f, " {}", argument)?;
+                }
+                write!(f, ")")
+            }
         }
     }
-}
-
-#[cfg(test)]
-mod test_expr {
-    use super::Expr;
-
-    #[test]
-    fn verify_assign() {}
 }

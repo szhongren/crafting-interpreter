@@ -69,7 +69,7 @@ impl Lox {
         match stmts {
             Ok(ref stmts) => {
                 for stmt in stmts {
-                    self.print_stmt(stmt);
+                    println!("{}", stmt);
                 }
             }
             Err(err) => {
@@ -88,36 +88,6 @@ impl Lox {
             println!("{}", err);
             if !reset_errors {
                 exit(65);
-            }
-        }
-    }
-
-    fn print_stmt(&self, stmt: &Stmt) {
-        match stmt {
-            Stmt::Block(stmts) => {
-                for stmt in stmts {
-                    self.print_stmt(stmt);
-                }
-            }
-            Stmt::Expression(expr) => {
-                println!("{}", expr);
-            }
-            Stmt::If(condition, then_branch, else_branch) => {
-                println!("**IF    **\n{}", condition);
-                println!("**THEN  **");
-                self.print_stmt(then_branch);
-                if let Some(statement) = &else_branch.borrow() {
-                    println!("**ELSE  **");
-                    self.print_stmt(statement);
-                }
-            }
-            Stmt::While(condition, body) => {
-                println!("**WHILE **\n{}", condition);
-                println!("**DO    **");
-                self.print_stmt(body);
-            }
-            stmt => {
-                println!("{:?}", stmt)
             }
         }
     }
