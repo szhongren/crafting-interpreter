@@ -33,6 +33,14 @@ impl Parser {
     fn declaration(&self) -> Result<Stmt, String> {
         // declaration    → varDecl | statement;
         if self.match_token_types(vec![TokenType::Var]) {
+            match self.func_declaration() {
+                Ok(func_declaration) => Ok(func_declaration),
+                Err(err) => {
+                    self.synchronize();
+                    Err(err)
+                }
+            }
+        } else if self.match_token_types(vec![TokenType::Var]) {
             match self.var_declaration() {
                 Ok(var_declaration) => Ok(var_declaration),
                 Err(err) => {
@@ -49,6 +57,11 @@ impl Parser {
                 }
             }
         }
+    }
+
+    fn func_declaration(&self) -> Result<Stmt, String> {
+        let name = self.consume(TokenType::Identifier, "Expected function name");
+        Err("TEST".to_string())
     }
 
     fn var_declaration(&self) -> Result<Stmt, String> {

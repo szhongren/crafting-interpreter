@@ -10,6 +10,7 @@ pub enum Stmt {
     Print(Box<Expr>),
     While(Box<Expr>, Box<Stmt>),
     VariableDeclaration(Box<Token>, Box<Expr>),
+    FunctionDeclaration(String, Vec<Token>, Vec<Stmt>),
 }
 
 impl Display for Stmt {
@@ -33,6 +34,17 @@ impl Display for Stmt {
             Stmt::Print(expr) => write!(f, "(print {})", expr),
             Stmt::While(condition, body) => write!(f, "(while {} do {})", condition, body),
             Stmt::VariableDeclaration(name, expr) => write!(f, "(var {} = {})", name.lexeme, expr),
+            Stmt::FunctionDeclaration(name, params, stmts) => {
+                write!(f, "(fun {} = ( ", name)?;
+                for param in params {
+                    write!(f, " {}", param)?;
+                }
+                write!(f, ") => ( ")?;
+                for stmt in stmts {
+                    write!(f, "{} ", stmt)?;
+                }
+                write!(f, "))")
+            }
         }
     }
 }

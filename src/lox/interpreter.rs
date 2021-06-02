@@ -78,6 +78,7 @@ impl Interpreter {
                     evaluation = self.evaluate(*condition.clone())?;
                 }
             }
+            Stmt::FunctionDeclaration(_, _, _) => (),
         };
         Ok(())
     }
