@@ -116,16 +116,19 @@ String works better when returning, so we don't have to fight the borrow checker
 added more rules at the top to handle statements
 
 ```
-program        → declaration* EOF;
-declaration    → varDecl | statement;
+program        → declaration* EOF ;
+declaration    → funDecl | varDecl | statement ;
+funDecl        → "fun" function ;
+function       → IDENTIFIER "(" parameters? ")" block ;
+parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 statement      → exprStatement
                | forStatement
                | ifStatement
                | printStatement
                | whileStatement
-               | block;
-exprStatement  → expression ";";
+               | block ;
+exprStatement  → expression ";" ;
 forStatement   → "for"
                  "(" (varDecl | exprStatement | ";")
                  expression? ";"

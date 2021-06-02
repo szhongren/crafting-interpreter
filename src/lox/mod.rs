@@ -9,7 +9,6 @@ pub mod token_type;
 pub mod value;
 
 use std::{
-    borrow::Borrow,
     fs,
     io::{self, Write},
     process::exit,
@@ -17,7 +16,7 @@ use std::{
 
 use crate::lox::interpreter::Interpreter;
 
-use self::{parser::Parser, scanner::Scanner, stmt::Stmt};
+use self::{parser::Parser, scanner::Scanner};
 
 pub struct Lox {}
 
