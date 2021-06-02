@@ -1,4 +1,11 @@
-use std::{array::IntoIter, cell::RefCell, collections::HashMap, iter::FromIterator, rc::Rc};
+use std::{
+    array::IntoIter,
+    cell::RefCell,
+    collections::HashMap,
+    iter::FromIterator,
+    rc::Rc,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use super::{
     environment::Environment,
@@ -19,7 +26,12 @@ impl Interpreter {
         let env = Rc::from(RefCell::from(Environment::new(
             HashMap::from_iter(IntoIter::new([(
                 "clock".to_string(),
-                Value::Callable(Function::new(0)),
+                Value::Callable(Function::new("clock".to_string(), 0, |_, _| {
+                    let start = SystemTime::now();
+                    let since_the_epoch = start.duration_since(UNIX_EPOCH).unwrap();
+
+                    Ok(Value::Number(since_the_epoch.as_millis() as f64))
+                })),
             )])),
             Option::None,
         )));

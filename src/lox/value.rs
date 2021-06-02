@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 
 use super::interpreter::Interpreter;
 
@@ -7,14 +7,42 @@ pub trait Callable {
     fn call(&self, interpreter: &Interpreter, arguments: Vec<Value>) -> Result<Value, String>;
 }
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(Clone)]
 pub struct Function {
-    pub arity: usize,
+    name: String,
+    arity: usize,
+    callable: fn(&Interpreter, Vec<Value>) -> Result<Value, String>,
+}
+
+impl Display for Function {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "(fn {} {})", self.name, self.arity)
+    }
+}
+
+impl PartialEq for Function {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name && self.arity == other.arity
+    }
+}
+
+impl Debug for Function {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "(fn {} {})", self.name, self.arity)
+    }
 }
 
 impl Function {
-    pub fn new(arity: usize) -> Self {
-        Self { arity }
+    pub fn new(
+        name: String,
+        arity: usize,
+        callable: fn(&Interpreter, Vec<Value>) -> Result<Value, String>,
+    ) -> Self {
+        Self {
+            name,
+            arity,
+            callable,
+        }
     }
 }
 
@@ -31,7 +59,7 @@ impl Callable for Function {
                 arguments.len()
             ));
         }
-        Ok(Value::Nil)
+        (self.callable)(interpreter, arguments)
     }
 }
 
@@ -82,7 +110,7 @@ impl Display for Value {
                 Value::String(string_value) => string_value.to_string(),
                 Value::Bool(bool_value) => bool_value.to_string(),
                 Value::Nil => String::from("nil"),
-                Value::Callable(arguments) => format!("callable ({:?})", arguments),
+                Value::Callable(callable) => format!("{}", callable),
             }
         )
     }
