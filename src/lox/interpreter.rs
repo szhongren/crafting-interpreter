@@ -8,8 +8,13 @@ use std::{
 };
 
 use super::{
-    callable::NativeFunction, environment::Environment, expr::Expr, stmt::Stmt, token::Token,
-    token_type::TokenType, value::Value,
+    callable::{Function, NativeFunction},
+    environment::Environment,
+    expr::Expr,
+    stmt::Stmt,
+    token::Token,
+    token_type::TokenType,
+    value::Value,
 };
 
 pub struct Interpreter {
@@ -22,7 +27,7 @@ impl Interpreter {
         let env = Rc::from(RefCell::from(Environment::new(
             HashMap::from_iter(IntoIter::new([(
                 "clock".to_string(),
-                Value::Callable(NativeFunction::new("clock".to_string(), 0, |_, _| {
+                Value::NativeFunction(NativeFunction::new("clock".to_string(), 0, |_, _| {
                     let start = SystemTime::now();
                     let since_the_epoch = start.duration_since(UNIX_EPOCH).unwrap();
 
@@ -45,7 +50,7 @@ impl Interpreter {
     }
 
     fn execute(&mut self, stmt: Stmt) -> Result<(), String> {
-        match stmt {
+        match stmt.clone() {
             Stmt::Expression(expr) => {
                 self.evaluate(*expr)?;
             }
@@ -57,7 +62,9 @@ impl Interpreter {
                 self.environment.borrow_mut().define(token.lexeme, eval);
             }
             Stmt::Block(statements) => {
-                self.execute_block(statements);
+                let new_environment =
+                    Environment::new(HashMap::new(), Some(self.environment.clone()));
+                self.execute_block(statements, new_environment);
             }
             Stmt::If(condition, then_branch, maybe_else_branch) => {
                 let eval = self.evaluate(*condition)?;
@@ -74,15 +81,17 @@ impl Interpreter {
                     evaluation = self.evaluate(*condition.clone())?;
                 }
             }
-            Stmt::FunctionDeclaration(_, _, _) => (),
+            Stmt::FunctionDeclaration(name, _, _) => {
+                let function = Value::Function(Function::new(stmt));
+                self.environment.borrow_mut().define(name.lexeme, function);
+            }
         };
         Ok(())
     }
 
-    pub fn execute_block(&mut self, statements: Vec<Stmt>) {
+    pub fn execute_block(&mut self, statements: Vec<Stmt>, new_environment: Environment) {
         // set current environment to newly constructed environment
         let previous = self.environment.clone();
-        let new_environment = Environment::new(HashMap::new(), Some(self.environment.clone()));
         self.environment = Rc::from(RefCell::from(new_environment));
 
         for statement in statements {
@@ -95,7 +104,7 @@ impl Interpreter {
         self.environment = previous;
     }
 
-    fn evaluate(&self, expr: Expr) -> Result<Value, String> {
+    fn evaluate(&mut self, expr: Expr) -> Result<Value, String> {
         match expr {
             Expr::Assign(name, value) => {
                 let evaluated_value = self.evaluate(*value)?;
@@ -138,7 +147,7 @@ impl Interpreter {
         }
     }
 
-    fn urnary(&self, operator: Token, right: Expr) -> Result<Value, String> {
+    fn urnary(&mut self, operator: Token, right: Expr) -> Result<Value, String> {
         let right_value = self.evaluate(right)?;
         match operator.token_type {
             TokenType::Minus => match right_value {
@@ -150,7 +159,7 @@ impl Interpreter {
         }
     }
 
-    fn binary(&self, left: Expr, operator: Token, right: Expr) -> Result<Value, String> {
+    fn binary(&mut self, left: Expr, operator: Token, right: Expr) -> Result<Value, String> {
         let left_value = self.evaluate(left)?;
         let right_value = self.evaluate(right)?;
         match operator.token_type {

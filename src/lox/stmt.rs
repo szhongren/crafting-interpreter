@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use super::{expr::Expr, token::Token};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Stmt {
     Block(Vec<Stmt>),
     Expression(Box<Expr>),

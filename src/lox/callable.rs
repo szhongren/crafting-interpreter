@@ -7,7 +7,7 @@ use super::{environment::Environment, interpreter::Interpreter, stmt::Stmt, valu
 
 pub trait Callable {
     fn arity(&self) -> usize;
-    fn call(&self, interpreter: &Interpreter, arguments: Vec<Value>) -> Result<Value, String>;
+    fn call(&self, interpreter: &mut Interpreter, arguments: Vec<Value>) -> Result<Value, String>;
 }
 
 #[derive(Clone)]
@@ -54,7 +54,7 @@ impl Callable for NativeFunction {
         self.arity
     }
 
-    fn call(&self, interpreter: &Interpreter, arguments: Vec<Value>) -> Result<Value, String> {
+    fn call(&self, interpreter: &mut Interpreter, arguments: Vec<Value>) -> Result<Value, String> {
         if arguments.len() != self.arity() {
             return Err(format!(
                 "Expected {} arguments but got {} arguments",
@@ -97,17 +97,41 @@ impl Display for Function {
 
 impl Callable for Function {
     fn arity(&self) -> usize {
-        todo!()
+        if let Stmt::FunctionDeclaration(_, parameters, _) = &self.declaration {
+            parameters.len()
+        } else {
+            panic!()
+        }
     }
 
-    fn call(&self, interpreter: &Interpreter, arguments: Vec<Value>) -> Result<Value, String> {
+    fn call(&self, interpreter: &mut Interpreter, arguments: Vec<Value>) -> Result<Value, String> {
         let mut environment = Environment::new(HashMap::new(), Some(interpreter.globals.clone()));
-        if let Stmt::FunctionDeclaration(name, parameters, body) = &self.declaration {
+        if let Stmt::FunctionDeclaration(_, parameters, body) = &self.declaration {
             for (parameter, argument) in parameters.iter().zip(arguments) {
                 environment.define(parameter.lexeme.clone(), argument);
             }
-            // interpreter.execute_block(body, environment);
+            interpreter.execute_block(body.to_vec(), environment);
             Ok(Value::Nil)
+        } else {
+            panic!()
+        }
+    }
+}
+
+impl PartialEq for Function {
+    fn eq(&self, other: &Self) -> bool {
+        self.declaration == other.declaration
+    }
+}
+
+impl Debug for Function {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Stmt::FunctionDeclaration(name, parameters, _) = &self.declaration {
+            write!(f, "(fn {}(", name.lexeme)?;
+            for parameter in parameters {
+                write!(f, " {}", parameter)?;
+            }
+            write!(f, "))")
         } else {
             panic!()
         }

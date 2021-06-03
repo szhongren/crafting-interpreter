@@ -1,7 +1,7 @@
 use std::fmt::{Debug, Display};
 
 use super::{
-    callable::{Callable, NativeFunction},
+    callable::{Callable, Function, NativeFunction},
     interpreter::Interpreter,
 };
 
@@ -11,12 +11,19 @@ pub enum Value {
     String(String),
     Bool(bool),
     Nil,
-    Callable(NativeFunction),
+    NativeFunction(NativeFunction),
+    Function(Function),
 }
 
 impl Value {
-    pub fn call(&self, interpreter: &Interpreter, arguments: Vec<Value>) -> Result<Value, String> {
-        if let Value::Callable(function) = self {
+    pub fn call(
+        &self,
+        interpreter: &mut Interpreter,
+        arguments: Vec<Value>,
+    ) -> Result<Value, String> {
+        if let Value::NativeFunction(function) = self {
+            function.call(interpreter, arguments)
+        } else if let Value::Function(function) = self {
             function.call(interpreter, arguments)
         } else {
             Err(format!("Value {} is not callable", self))
@@ -52,7 +59,8 @@ impl Display for Value {
                 Value::String(string_value) => string_value.to_string(),
                 Value::Bool(bool_value) => bool_value.to_string(),
                 Value::Nil => String::from("nil"),
-                Value::Callable(callable) => format!("{}", callable),
+                Value::NativeFunction(callable) => format!("{}", callable),
+                Value::Function(callable) => format!("{}", callable),
             }
         )
     }
