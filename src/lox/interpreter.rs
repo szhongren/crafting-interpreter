@@ -8,12 +8,8 @@ use std::{
 };
 
 use super::{
-    environment::Environment,
-    expr::Expr,
-    stmt::Stmt,
-    token::Token,
-    token_type::TokenType,
-    value::{Function, Value},
+    callable::Function, environment::Environment, expr::Expr, stmt::Stmt, token::Token,
+    token_type::TokenType, value::Value,
 };
 
 pub struct Interpreter {
