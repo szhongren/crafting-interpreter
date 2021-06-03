@@ -46,7 +46,7 @@ impl Display for Stmt {
                 }
                 write!(f, "))")
             }
-            Stmt::Return(_, _) => todo!(),
+            Stmt::Return(_, value) => write!(f, "(return {})", value),
         }
     }
 }

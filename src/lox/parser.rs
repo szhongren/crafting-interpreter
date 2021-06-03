@@ -126,6 +126,8 @@ impl Parser {
             Ok(self.for_statement()?)
         } else if self.match_token_types(vec![TokenType::Print]) {
             Ok(self.print_statement()?)
+        } else if self.match_token_types(vec![TokenType::Return]) {
+            Ok(self.return_statement()?)
         } else if self.match_token_types(vec![TokenType::While]) {
             Ok(self.while_statement()?)
         } else if self.match_token_types(vec![TokenType::LeftBrace]) {
@@ -231,6 +233,17 @@ impl Parser {
         let expression = self.expression()?;
         self.consume(TokenType::Semicolon, "Expected ';' after value")?;
         Ok(Stmt::Print(Box::from(expression)))
+    }
+
+    fn return_statement(&self) -> Result<Stmt, String> {
+        // returnStatement → "return" expression? ";" ;
+        let keyword = self.previous();
+        let mut value = Expr::NilLiteral;
+        if !self.check(TokenType::Semicolon) {
+            value = self.expression()?;
+        }
+        self.consume(TokenType::Semicolon, "Expected ';' after return value")?;
+        Ok(Stmt::Return(keyword, Box::new(value)))
     }
 
     fn while_statement(&self) -> Result<Stmt, String> {
