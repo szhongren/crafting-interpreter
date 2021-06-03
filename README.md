@@ -116,40 +116,42 @@ String works better when returning, so we don't have to fight the borrow checker
 added more rules at the top to handle statements
 
 ```
-program        → declaration* EOF ;
-declaration    → funDecl | varDecl | statement ;
-funDecl        → "fun" function ;
-function       → IDENTIFIER "(" parameters? ")" block ;
-parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
-varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
-statement      → exprStatement
-               | forStatement
-               | ifStatement
-               | printStatement
-               | whileStatement
-               | block ;
-exprStatement  → expression ";" ;
-forStatement   → "for"
-                 "(" (varDecl | exprStatement | ";")
-                 expression? ";"
-                 expression? ")"
-                 statement;
-ifStatement    → "if" "(" expression ")" statement ( "else" statement )?;
-printStatement → "print" expression ";";
-whileStatement → "while" "(" expression ")" statement;
-block          → "{" declaration* "}";
-expression     → assignment;
-assignment     → IDENTIFIER "=" assignment | equality | logic_or;
-logic_or       → logic_and ( "or" logic_and )*;
-logic_and      → equality ( "and" equality )*;
-equality       → comparison ( ( "!=" | "==" ) comparison )* ;
-comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-term           → factor ( ( "-" | "+" ) factor )* ;
-factor         → unary ( ( "/" | "*" ) unary )* ; // instead of making it left-recursive, we make it a flat sequence of mults/divs
-unary          → ( "!" | "-" ) unary // recursive urnary
-               | call ;
-call           → primary ( "(" arguments? ")" )* ;
-arguments      → expression ( "," expression )* ;
-primary        → NUMBER | STRING | "true" | "false" | "nil"
-               | "(" expression ")" | IDENTIFIER;
+program         → declaration* EOF ;
+declaration     → funDecl | varDecl | statement ;
+funDecl         → "fun" function ;
+function        → IDENTIFIER "(" parameters? ")" block ;
+parameters      → IDENTIFIER ( "," IDENTIFIER )* ;
+varDecl         → "var" IDENTIFIER ( "=" expression )? ";" ;
+statement       → exprStatement
+                | forStatement
+                | ifStatement
+                | printStatement
+                | returnStatement
+                | whileStatement
+                | block ;
+returnStatement → "return" expression? ";" ;
+exprStatement   → expression ";" ;
+forStatement    → "for"
+                  "(" (varDecl | exprStatement | ";")
+                  expression? ";"
+                  expression? ")"
+                  statement;
+ifStatement     → "if" "(" expression ")" statement ( "else" statement )?;
+printStatement  → "print" expression ";";
+whileStatement  → "while" "(" expression ")" statement;
+block           → "{" declaration* "}";
+expression      → assignment;
+assignment      → IDENTIFIER "=" assignment | equality | logic_or;
+logic_or        → logic_and ( "or" logic_and )*;
+logic_and       → equality ( "and" equality )*;
+equality        → comparison ( ( "!=" | "==" ) comparison )* ;
+comparison      → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term            → factor ( ( "-" | "+" ) factor )* ;
+factor          → unary ( ( "/" | "*" ) unary )* ; // instead of making it left-recursive, we make it a flat sequence of mults/divs
+unary           → ( "!" | "-" ) unary // recursive urnary
+                | call ;
+call            → primary ( "(" arguments? ")" )* ;
+arguments       → expression ( "," expression )* ;
+primary         → NUMBER | STRING | "true" | "false" | "nil"
+                | "(" expression ")" | IDENTIFIER;
 ```
