@@ -137,8 +137,10 @@ impl Callable for Function {
             for (parameter, argument) in parameters.iter().zip(arguments) {
                 environment.define(parameter.lexeme.clone(), argument);
             }
-            interpreter.execute_block(body.to_vec(), environment);
-            Ok(Value::Nil)
+            match interpreter.execute_block(body.to_vec(), environment) {
+                Ok(_) => Ok(Value::Nil),
+                Err(value) => Ok(value),
+            }
         } else {
             panic!()
         }

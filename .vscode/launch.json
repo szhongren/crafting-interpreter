@@ -7,6 +7,16 @@
     {
       "type": "lldb",
       "request": "launch",
+      "name": "Cargo launch",
+      "cargo": {
+        "args": ["build", "--bin=crafting-interpreter"]
+      },
+      "program": "${cargo:program}",
+      "args": ["fn_def.lox"]
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
       "name": "Debug executable 'crafting-interpreter'",
       "cargo": {
         "args": [
@@ -19,7 +29,7 @@
           "kind": "bin"
         }
       },
-      "args": ["while_loop.lox"],
+      "args": ["fn_def.lox"],
       "cwd": "${workspaceFolder}"
     },
     {

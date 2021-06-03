@@ -42,14 +42,14 @@ impl Interpreter {
         }
     }
 
-    pub fn interpret(&mut self, stmts: Vec<Stmt>) -> Result<(), String> {
+    pub fn interpret(&mut self, stmts: Vec<Stmt>) -> Result<(), Value> {
         for stmt in stmts {
             self.execute(stmt)?;
         }
         Ok(())
     }
 
-    fn execute(&mut self, stmt: Stmt) -> Result<(), String> {
+    fn execute(&mut self, stmt: Stmt) -> Result<(), Value> {
         match stmt.clone() {
             Stmt::Expression(expr) => {
                 self.evaluate(*expr)?;
@@ -64,7 +64,7 @@ impl Interpreter {
             Stmt::Block(statements) => {
                 let new_environment =
                     Environment::new(HashMap::new(), Some(self.environment.clone()));
-                self.execute_block(statements, new_environment);
+                self.execute_block(statements, new_environment)?;
             }
             Stmt::If(condition, then_branch, maybe_else_branch) => {
                 let eval = self.evaluate(*condition)?;
@@ -85,24 +85,37 @@ impl Interpreter {
                 let function = Value::Function(Function::new(stmt));
                 self.environment.borrow_mut().define(name.lexeme, function);
             }
-            Stmt::Return(_, _) => todo!(),
+            Stmt::Return(_, value) => {
+                let mut return_value = Value::Nil;
+                if *value != Expr::NilLiteral {
+                    return_value = self.evaluate(*value)?;
+                };
+                return Err(return_value);
+            }
         };
         Ok(())
     }
 
-    pub fn execute_block(&mut self, statements: Vec<Stmt>, new_environment: Environment) {
+    pub fn execute_block(
+        &mut self,
+        statements: Vec<Stmt>,
+        new_environment: Environment,
+    ) -> Result<(), Value> {
         // set current environment to newly constructed environment
         let previous = self.environment.clone();
         self.environment = Rc::from(RefCell::from(new_environment));
 
         for statement in statements {
-            if self.execute(statement).is_err() {
-                break;
+            let result = self.execute(statement);
+            if let Err(value) = result {
+                self.environment = previous;
+                return Err(value);
             }
         }
 
         // set to original environment with changes
         self.environment = previous;
+        Ok(())
     }
 
     fn evaluate(&mut self, expr: Expr) -> Result<Value, String> {
