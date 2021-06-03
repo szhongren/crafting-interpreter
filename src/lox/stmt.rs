@@ -11,6 +11,7 @@ pub enum Stmt {
     While(Box<Expr>, Box<Stmt>),
     VariableDeclaration(Box<Token>, Box<Expr>),
     FunctionDeclaration(Token, Vec<Token>, Vec<Stmt>),
+    Return(Token, Box<Expr>),
 }
 
 impl Display for Stmt {
@@ -45,6 +46,7 @@ impl Display for Stmt {
                 }
                 write!(f, "))")
             }
+            Stmt::Return(_, _) => todo!(),
         }
     }
 }

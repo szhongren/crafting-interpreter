@@ -85,6 +85,7 @@ impl Interpreter {
                 let function = Value::Function(Function::new(stmt));
                 self.environment.borrow_mut().define(name.lexeme, function);
             }
+            Stmt::Return(_, _) => todo!(),
         };
         Ok(())
     }
