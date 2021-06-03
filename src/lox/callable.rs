@@ -95,29 +95,6 @@ impl Display for Function {
     }
 }
 
-impl Callable for Function {
-    fn arity(&self) -> usize {
-        if let Stmt::FunctionDeclaration(_, parameters, _) = &self.declaration {
-            parameters.len()
-        } else {
-            panic!()
-        }
-    }
-
-    fn call(&self, interpreter: &mut Interpreter, arguments: Vec<Value>) -> Result<Value, String> {
-        let mut environment = Environment::new(HashMap::new(), Some(interpreter.globals.clone()));
-        if let Stmt::FunctionDeclaration(_, parameters, body) = &self.declaration {
-            for (parameter, argument) in parameters.iter().zip(arguments) {
-                environment.define(parameter.lexeme.clone(), argument);
-            }
-            interpreter.execute_block(body.to_vec(), environment);
-            Ok(Value::Nil)
-        } else {
-            panic!()
-        }
-    }
-}
-
 impl PartialEq for Function {
     fn eq(&self, other: &Self) -> bool {
         self.declaration == other.declaration
@@ -132,6 +109,36 @@ impl Debug for Function {
                 write!(f, " {}", parameter)?;
             }
             write!(f, "))")
+        } else {
+            panic!()
+        }
+    }
+}
+
+impl Callable for Function {
+    fn arity(&self) -> usize {
+        if let Stmt::FunctionDeclaration(_, parameters, _) = &self.declaration {
+            parameters.len()
+        } else {
+            panic!()
+        }
+    }
+
+    fn call(&self, interpreter: &mut Interpreter, arguments: Vec<Value>) -> Result<Value, String> {
+        if arguments.len() != self.arity() {
+            return Err(format!(
+                "Expected {} arguments but got {} arguments",
+                self.arity(),
+                arguments.len()
+            ));
+        }
+        let mut environment = Environment::new(HashMap::new(), Some(interpreter.globals.clone()));
+        if let Stmt::FunctionDeclaration(_, parameters, body) = &self.declaration {
+            for (parameter, argument) in parameters.iter().zip(arguments) {
+                environment.define(parameter.lexeme.clone(), argument);
+            }
+            interpreter.execute_block(body.to_vec(), environment);
+            Ok(Value::Nil)
         } else {
             panic!()
         }

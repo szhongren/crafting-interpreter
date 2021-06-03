@@ -248,10 +248,11 @@ impl<'a> Scanner<'a> {
         self.advance();
 
         let string_value = self.get_lexeme();
+        let string_without_quotes = string_value[1..string_value.len() - 1].to_string();
         Ok(Token::new(
             TokenType::String,
             string_value.clone(),
-            Some(Literal::String(string_value)),
+            Some(Literal::String(string_without_quotes)),
             self.line,
         ))
     }
