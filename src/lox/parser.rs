@@ -163,9 +163,9 @@ impl Parser {
         let then_branch = self.statement()?;
 
         let else_branch = if self.match_token_types(vec![TokenType::Else]) {
-            Option::from(self.statement()?)
+            Some(self.statement()?)
         } else {
-            Option::None
+            None
         };
 
         Ok(Stmt::If(
@@ -183,24 +183,24 @@ impl Parser {
         //                  statement;
         self.consume(TokenType::LeftParen, "Expected '(' after 'for'")?;
         let initializer = if self.match_token_types(vec![TokenType::Semicolon]) {
-            Option::None
+            None
         } else if self.match_token_types(vec![TokenType::Var]) {
-            Option::from(self.var_declaration()?)
+            Some(self.var_declaration()?)
         } else {
-            Option::from(self.expression_statement()?)
+            Some(self.expression_statement()?)
         };
 
         let condition = if !self.check(TokenType::Semicolon) {
-            Option::from(self.expression()?)
+            Some(self.expression()?)
         } else {
-            Option::None
+            None
         };
         self.consume(TokenType::Semicolon, "Expected ';' after loop condition")?;
 
         let increment = if !self.check(TokenType::RightParen) {
-            Option::from(self.expression()?)
+            Some(self.expression()?)
         } else {
-            Option::None
+            None
         };
         self.consume(TokenType::RightParen, "Expected ')' after for clauses")?;
 

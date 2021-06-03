@@ -1,6 +1,9 @@
-use std::fmt::{Debug, Display};
+use std::{
+    collections::HashMap,
+    fmt::{Debug, Display},
+};
 
-use super::{interpreter::Interpreter, value::Value};
+use super::{environment::Environment, interpreter::Interpreter, stmt::Stmt, value::Value};
 
 pub trait Callable {
     fn arity(&self) -> usize;
@@ -28,7 +31,7 @@ impl PartialEq for NativeFunction {
 
 impl Debug for NativeFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "(fn {} {})", self.name, self.arity)
+        write!(f, "(nativefn {} {})", self.name, self.arity)
     }
 }
 
@@ -60,5 +63,53 @@ impl Callable for NativeFunction {
             ));
         }
         (self.callable)(interpreter, arguments)
+    }
+}
+
+#[derive(Clone)]
+pub struct Function {
+    declaration: Stmt,
+}
+
+impl Function {
+    pub fn new(declaration: Stmt) -> Self {
+        if let Stmt::FunctionDeclaration(_, _, _) = declaration {
+            Self { declaration }
+        } else {
+            panic!()
+        }
+    }
+}
+
+impl Display for Function {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Stmt::FunctionDeclaration(name, parameters, _) = &self.declaration {
+            write!(f, "(fn {}(", name.lexeme)?;
+            for parameter in parameters {
+                write!(f, " {}", parameter)?;
+            }
+            write!(f, "))")
+        } else {
+            panic!()
+        }
+    }
+}
+
+impl Callable for Function {
+    fn arity(&self) -> usize {
+        todo!()
+    }
+
+    fn call(&self, interpreter: &Interpreter, arguments: Vec<Value>) -> Result<Value, String> {
+        let mut environment = Environment::new(HashMap::new(), Some(interpreter.globals.clone()));
+        if let Stmt::FunctionDeclaration(name, parameters, body) = &self.declaration {
+            for (parameter, argument) in parameters.iter().zip(arguments) {
+                environment.define(parameter.lexeme.clone(), argument);
+            }
+            // interpreter.execute_block(body, environment);
+            Ok(Value::Nil)
+        } else {
+            panic!()
+        }
     }
 }

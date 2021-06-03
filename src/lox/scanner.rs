@@ -53,12 +53,8 @@ impl<'a> Scanner<'a> {
             self.start = self.current;
             self.scan_token()?;
         }
-        self.tokens.push(Token::new(
-            TokenType::Eof,
-            "".to_string(),
-            Option::None,
-            self.line,
-        ));
+        self.tokens
+            .push(Token::new(TokenType::Eof, "".to_string(), None, self.line));
         Ok(self.tokens.clone())
     }
 
@@ -80,22 +76,22 @@ impl<'a> Scanner<'a> {
             '+' => self.generate_token_option(TokenType::Plus),
             ';' => self.generate_token_option(TokenType::Semicolon),
             '*' => self.generate_token_option(TokenType::Star),
-            '!' => Option::from(if self.match_char('=') {
+            '!' => Some(if self.match_char('=') {
                 self.generate_new_token(TokenType::BangEqual)
             } else {
                 self.generate_new_token(TokenType::Bang)
             }),
-            '=' => Option::from(if self.match_char('=') {
+            '=' => Some(if self.match_char('=') {
                 self.generate_new_token(TokenType::EqualEqual)
             } else {
                 self.generate_new_token(TokenType::Equal)
             }),
-            '<' => Option::from(if self.match_char('=') {
+            '<' => Some(if self.match_char('=') {
                 self.generate_new_token(TokenType::LessEqual)
             } else {
                 self.generate_new_token(TokenType::Less)
             }),
-            '>' => Option::from(if self.match_char('=') {
+            '>' => Some(if self.match_char('=') {
                 self.generate_new_token(TokenType::GreaterEqual)
             } else {
                 self.generate_new_token(TokenType::Greater)
@@ -105,20 +101,20 @@ impl<'a> Scanner<'a> {
                     while self.peek() != '\n' && !self.is_at_end() {
                         self.advance();
                     }
-                    Option::None
+                    None
                 } else {
                     self.generate_token_option(TokenType::Slash)
                 }
             }
             // ignore whitespace
-            ' ' | '\r' | '\t' => Option::None,
+            ' ' | '\r' | '\t' => None,
             '\n' => {
                 self.line += 1;
-                Option::None
+                None
             }
             '"' => {
                 let result_string = self.string()?;
-                Option::from(result_string)
+                Some(result_string)
             }
             '0'..='9' => self.number(),
             'a'..='z' | 'A'..='Z' | '_' => self.identifier(),
@@ -134,11 +130,11 @@ impl<'a> Scanner<'a> {
     }
 
     fn generate_token_option(&self, token_type: TokenType) -> Option<Token> {
-        Option::from(self.generate_new_token(token_type))
+        Some(self.generate_new_token(token_type))
     }
 
     fn generate_new_token(&self, token_type: TokenType) -> Token {
-        Token::new(token_type, self.get_lexeme(), Option::None, self.line)
+        Token::new(token_type, self.get_lexeme(), None, self.line)
     }
 
     // guts
@@ -228,10 +224,10 @@ impl<'a> Scanner<'a> {
         }
 
         let number_literal = self.get_lexeme();
-        Option::from(Token::new(
+        Some(Token::new(
             TokenType::Number,
             number_literal.clone(),
-            Option::from(Literal::Number(number_literal.parse::<f64>().unwrap())),
+            Some(Literal::Number(number_literal.parse::<f64>().unwrap())),
             self.line,
         ))
     }
@@ -255,7 +251,7 @@ impl<'a> Scanner<'a> {
         Ok(Token::new(
             TokenType::String,
             string_value.clone(),
-            Option::from(Literal::String(string_value)),
+            Some(Literal::String(string_value)),
             self.line,
         ))
     }

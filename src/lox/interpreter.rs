@@ -13,7 +13,7 @@ use super::{
 };
 
 pub struct Interpreter {
-    globals: Rc<RefCell<Environment>>,
+    pub globals: Rc<RefCell<Environment>>,
     environment: Rc<RefCell<Environment>>,
 }
 
@@ -29,7 +29,7 @@ impl Interpreter {
                     Ok(Value::Number(since_the_epoch.as_millis() as f64))
                 })),
             )])),
-            Option::None,
+            None,
         )));
         Self {
             environment: env.clone(),
@@ -79,11 +79,10 @@ impl Interpreter {
         Ok(())
     }
 
-    fn execute_block(&mut self, statements: Vec<Stmt>) {
+    pub fn execute_block(&mut self, statements: Vec<Stmt>) {
         // set current environment to newly constructed environment
         let previous = self.environment.clone();
-        let new_environment =
-            Environment::new(HashMap::new(), Option::from(self.environment.clone()));
+        let new_environment = Environment::new(HashMap::new(), Some(self.environment.clone()));
         self.environment = Rc::from(RefCell::from(new_environment));
 
         for statement in statements {
