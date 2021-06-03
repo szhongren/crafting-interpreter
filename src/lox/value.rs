@@ -77,7 +77,7 @@ impl Value {
         if let Value::Callable(function) = self {
             function.call(interpreter, arguments)
         } else {
-            Err(format!("Value {:?} is not callable", self))
+            Err(format!("Value {} is not callable", self))
         }
     }
 }

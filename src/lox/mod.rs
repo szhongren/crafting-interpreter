@@ -25,7 +25,7 @@ impl Lox {
         // lifetime of source is this block
         let source: String =
             fs::read_to_string(file_name).expect("Something went wrong reading the file");
-        self.run(source.as_str(), false);
+        self.run(&source, false);
     }
 
     pub fn run_prompt(&self) {
@@ -38,7 +38,7 @@ impl Lox {
                 .read_line(&mut line)
                 .expect("something went wrong");
             // run borrows line
-            self.run(line.as_str(), true);
+            self.run(&line, true);
             print!("\n");
         }
     }

@@ -32,8 +32,8 @@ impl Parser {
 
     fn declaration(&self) -> Result<Stmt, String> {
         // declaration    → varDecl | statement;
-        if self.match_token_types(vec![TokenType::Var]) {
-            match self.func_declaration() {
+        if self.match_token_types(vec![TokenType::Fun]) {
+            match self.func_declaration("function") {
                 Ok(func_declaration) => Ok(func_declaration),
                 Err(err) => {
                     self.synchronize();
@@ -59,14 +59,42 @@ impl Parser {
         }
     }
 
-    fn func_declaration(&self) -> Result<Stmt, String> {
-        let name = self.consume(TokenType::Identifier, "Expected function name");
-        Err("TEST".to_string())
+    fn func_declaration(&self, kind: &str) -> Result<Stmt, String> {
+        let name = self.consume(TokenType::Identifier, &format!("Expected {} name", kind))?;
+        self.consume(
+            TokenType::LeftParen,
+            &format!("Expected '(' after {} name", kind),
+        )?;
+
+        let mut parameters = Vec::new();
+        if !self.check(TokenType::RightParen) {
+            while {
+                if parameters.len() >= 255 {
+                    return Err(format!(
+                        "Can't have more than 255 parameters: {}",
+                        self.peek()
+                    ));
+                }
+                parameters.push(self.consume(TokenType::Identifier, "Expected parameter name")?);
+                self.match_token_types(vec![TokenType::Comma])
+            } {}
+        }
+
+        self.consume(
+            TokenType::RightParen,
+            &format!("Expected ')' after parameters"),
+        )?;
+        self.consume(
+            TokenType::LeftBrace,
+            &format!("Expected '{{' before {} body", kind),
+        )?;
+        let body = self.block()?;
+        Ok(Stmt::FunctionDeclaration(name, parameters, body))
     }
 
     fn var_declaration(&self) -> Result<Stmt, String> {
         // varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
-        let name = self.consume(TokenType::Identifier, "Expected variable name.")?;
+        let name = self.consume(TokenType::Identifier, "Expected variable name")?;
 
         let initializer = if self.match_token_types(vec![TokenType::Equal]) {
             self.expression()?
@@ -227,12 +255,7 @@ impl Parser {
             let value = self.assignment()?;
             match expr {
                 Expr::Variable(name) => return Ok(Expr::Assign(name, Box::from(value))),
-                _ => {
-                    return Err(format!(
-                        "Invalid assignment: {} {:?} {}",
-                        expr, equals, value
-                    ))
-                }
+                _ => return Err(format!("Invalid assignment: {} {} {}", expr, equals, value)),
             }
         };
         Ok(expr)
@@ -344,7 +367,7 @@ impl Parser {
                     while {
                         if arguments.len() >= 255 {
                             return Err(format!(
-                                "Can't have more than 255 arguments: {:?}",
+                                "Can't have more than 255 arguments: {}",
                                 self.peek()
                             ));
                         }
