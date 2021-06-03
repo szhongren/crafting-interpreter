@@ -8,31 +8,31 @@ pub trait Callable {
 }
 
 #[derive(Clone)]
-pub struct Function {
+pub struct NativeFunction {
     name: String,
     arity: usize,
     callable: fn(&Interpreter, Vec<Value>) -> Result<Value, String>,
 }
 
-impl Display for Function {
+impl Display for NativeFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "(fn {} {})", self.name, self.arity)
     }
 }
 
-impl PartialEq for Function {
+impl PartialEq for NativeFunction {
     fn eq(&self, other: &Self) -> bool {
         self.name == other.name && self.arity == other.arity
     }
 }
 
-impl Debug for Function {
+impl Debug for NativeFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "(fn {} {})", self.name, self.arity)
     }
 }
 
-impl Function {
+impl NativeFunction {
     pub fn new(
         name: String,
         arity: usize,
@@ -46,7 +46,7 @@ impl Function {
     }
 }
 
-impl Callable for Function {
+impl Callable for NativeFunction {
     fn arity(&self) -> usize {
         self.arity
     }

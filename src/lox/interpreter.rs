@@ -8,7 +8,7 @@ use std::{
 };
 
 use super::{
-    callable::Function, environment::Environment, expr::Expr, stmt::Stmt, token::Token,
+    callable::NativeFunction, environment::Environment, expr::Expr, stmt::Stmt, token::Token,
     token_type::TokenType, value::Value,
 };
 
@@ -22,7 +22,7 @@ impl Interpreter {
         let env = Rc::from(RefCell::from(Environment::new(
             HashMap::from_iter(IntoIter::new([(
                 "clock".to_string(),
-                Value::Callable(Function::new("clock".to_string(), 0, |_, _| {
+                Value::Callable(NativeFunction::new("clock".to_string(), 0, |_, _| {
                     let start = SystemTime::now();
                     let since_the_epoch = start.duration_since(UNIX_EPOCH).unwrap();
 
@@ -32,7 +32,7 @@ impl Interpreter {
             Option::None,
         )));
         Self {
-            environment: Rc::clone(&env),
+            environment: env.clone(),
             globals: env,
         }
     }

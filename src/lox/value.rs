@@ -1,7 +1,7 @@
 use std::fmt::{Debug, Display};
 
 use super::{
-    callable::{Callable, Function},
+    callable::{Callable, NativeFunction},
     interpreter::Interpreter,
 };
 
@@ -11,7 +11,7 @@ pub enum Value {
     String(String),
     Bool(bool),
     Nil,
-    Callable(Function),
+    Callable(NativeFunction),
 }
 
 impl Value {
