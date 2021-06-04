@@ -121,12 +121,23 @@ impl Interpreter {
     }
 
     fn evaluate(&mut self, expr: Expr) -> Result<Value, String> {
-        match expr {
+        match expr.clone() {
             Expr::Assign(name, value) => {
                 let evaluated_value = self.evaluate(*value)?;
-                self.environment
-                    .borrow_mut()
-                    .assign(name, evaluated_value.clone())?;
+                match self.locals.borrow().get(&expr) {
+                    Some(distance) => {
+                        self.environment.borrow_mut().assign_at(
+                            *distance,
+                            name.lexeme,
+                            evaluated_value.clone(),
+                        );
+                    }
+                    None => {
+                        self.globals
+                            .borrow_mut()
+                            .assign(name, evaluated_value.clone())?;
+                    }
+                }
                 Ok(evaluated_value)
             }
             Expr::Binary(left, operator, right) => self.binary(*left, operator, *right),
@@ -254,8 +265,8 @@ impl Interpreter {
 
     fn lookup_variable(&self, name: Token, expr: &Expr) -> Result<Value, String> {
         match self.locals.borrow().get(expr) {
-            Some(distance) => self.globals.borrow().get(name.lexeme),
-            None => todo!(),
+            Some(distance) => self.environment.borrow().get_at(*distance, name.lexeme),
+            None => self.globals.borrow().get(name.lexeme),
         }
     }
 }
