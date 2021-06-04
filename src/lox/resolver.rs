@@ -74,14 +74,21 @@ impl Resolver {
                 self.resolve_expression(value)?;
                 self.resolve_local(expression, name);
             }
-            Expr::Binary(_, _, _) => todo!(),
-            Expr::Grouping(_) => todo!(),
-            Expr::Urnary(_, _) => todo!(),
-            Expr::StringLiteral(_) => todo!(),
-            Expr::NumberLiteral(_) => todo!(),
-            Expr::NilLiteral => todo!(),
-            Expr::TrueLiteral => todo!(),
-            Expr::FalseLiteral => todo!(),
+            Expr::Binary(left, _, right) => {
+                self.resolve_expression(left)?;
+                self.resolve_expression(right)?;
+            }
+            Expr::Grouping(expression) => {
+                self.resolve_expression(expression)?;
+            }
+            Expr::Urnary(_, right) => {
+                self.resolve_expression(right)?;
+            }
+            Expr::StringLiteral(_) => (),
+            Expr::NumberLiteral(_) => (),
+            Expr::NilLiteral => (),
+            Expr::TrueLiteral => (),
+            Expr::FalseLiteral => (),
             Expr::Variable(name) => {
                 if !self.scopes.is_empty()
                     && self.scopes.last().unwrap().get(&name.lexeme).unwrap() == &false
@@ -92,7 +99,10 @@ impl Resolver {
                 }
                 self.resolve_local(expression, name);
             }
-            Expr::Logical(_, _, _) => todo!(),
+            Expr::Logical(left, _, right) => {
+                self.resolve_expression(left)?;
+                self.resolve_expression(right)?;
+            }
             Expr::Call(_, _, _) => todo!(),
         }
         Ok(())
