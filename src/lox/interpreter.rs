@@ -20,6 +20,7 @@ use super::{
 pub struct Interpreter {
     pub globals: Rc<RefCell<Environment>>,
     environment: Rc<RefCell<Environment>>,
+    locals: Rc<RefCell<HashMap<Expr, usize>>>,
 }
 
 impl Interpreter {
@@ -39,6 +40,7 @@ impl Interpreter {
         Self {
             environment: env.clone(),
             globals: env,
+            locals: Rc::from(RefCell::from(HashMap::new())),
         }
     }
 
@@ -246,5 +248,14 @@ impl Interpreter {
         left_value == right_value
     }
 
-    pub fn resolve(&self, expression: &Expr, depth: usize) {}
+    pub fn resolve(&self, expression: &Expr, depth: usize) {
+        self.locals.borrow_mut().insert(expression.clone(), depth);
+    }
+
+    fn lookup_variable(&self, name: Token, expr: &Expr) -> Result<Value, String> {
+        match self.locals.borrow().get(expr) {
+            Some(distance) => self.globals.borrow().get(name.lexeme),
+            None => todo!(),
+        }
+    }
 }

@@ -25,6 +25,16 @@ pub struct Token {
     pub line: i32,
 }
 
+impl std::hash::Hash for Token {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.token_type.hash(state);
+        self.lexeme.hash(state);
+        self.line.hash(state);
+    }
+}
+
+impl Eq for Token {}
+
 impl Token {
     pub fn new(token_type: TokenType, lexeme: String, literal: Option<Literal>, line: i32) -> Self {
         Self {
