@@ -29,24 +29,41 @@ impl Resolver {
                 self.resolve(statements)?;
                 self.end_scope();
             }
-            Stmt::Expression(_) => todo!(),
-            Stmt::If(_, _, _) => todo!(),
-            Stmt::Print(_) => todo!(),
-            Stmt::While(_, _) => todo!(),
-            Stmt::VariableDeclaration(name, initializer) => {
-                self.declare(&name);
-                if **initializer != Expr::NilLiteral {
-                    self.resolve_expression(&initializer)?;
+            Stmt::Expression(expression) => {
+                self.resolve_expression(expression)?;
+            }
+            Stmt::If(condition, then_branch, else_branch) => {
+                self.resolve_expression(condition)?;
+                self.resolve_statement(then_branch)?;
+                if let Some(else_statement) = &**else_branch {
+                    self.resolve_statement(else_statement)?;
                 }
-                self.define(&name);
+            }
+            Stmt::Print(expression) => {
+                self.resolve_expression(expression)?;
+            }
+            Stmt::While(condition, statement) => {
+                self.resolve_expression(condition)?;
+                self.resolve_statement(statement)?;
+            }
+            Stmt::VariableDeclaration(name, initializer) => {
+                self.declare(name);
+                if **initializer != Expr::NilLiteral {
+                    self.resolve_expression(initializer)?;
+                }
+                self.define(name);
             }
             Stmt::FunctionDeclaration(name, _, _) => {
                 self.declare(name);
                 self.define(name);
 
-                self.resolve_function(statement);
+                self.resolve_function(statement)?;
             }
-            Stmt::Return(_, _) => todo!(),
+            Stmt::Return(_, value) => {
+                if **value != Expr::NilLiteral {
+                    self.resolve_expression(value)?;
+                }
+            }
         }
         Ok(())
     }
@@ -87,6 +104,7 @@ impl Resolver {
             if scope.contains_key(&name.lexeme) {
                 self.interpreter
                     .resolve(expression, self.scopes.len() - 1 - i);
+                return;
             }
         }
     }
@@ -119,6 +137,7 @@ impl Resolver {
             return;
         }
 
+        // means that the variable assignment exists and we know about it
         self.scopes
             .last_mut()
             .unwrap()
@@ -130,6 +149,7 @@ impl Resolver {
             return;
         }
 
+        // means that the variable has been assigned a value
         self.scopes
             .last_mut()
             .unwrap()
