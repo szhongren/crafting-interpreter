@@ -57,9 +57,9 @@ impl Interpreter {
             Stmt::Print(expr) => {
                 println!("{}", self.evaluate(*expr)?.to_string());
             }
-            Stmt::VariableDeclaration(token, expr) => {
-                let eval = self.evaluate(*expr)?;
-                self.environment.borrow_mut().define(token.lexeme, eval);
+            Stmt::VariableDeclaration(name, initializer) => {
+                let eval = self.evaluate(*initializer)?;
+                self.environment.borrow_mut().define(name.lexeme, eval);
             }
             Stmt::Block(statements) => {
                 let new_environment =
