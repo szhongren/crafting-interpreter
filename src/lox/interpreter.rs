@@ -245,4 +245,6 @@ impl Interpreter {
     fn is_equal(&self, left_value: Value, right_value: Value) -> bool {
         left_value == right_value
     }
+
+    pub fn resolve(&self, expression: &Expr, depth: usize) {}
 }
