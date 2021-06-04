@@ -1,6 +1,8 @@
 use std::{
+    cell::RefCell,
     collections::HashMap,
     fmt::{Debug, Display},
+    rc::Rc,
 };
 
 use super::{environment::Environment, interpreter::Interpreter, stmt::Stmt, value::Value};
@@ -69,12 +71,16 @@ impl Callable for NativeFunction {
 #[derive(Clone)]
 pub struct Function {
     declaration: Stmt,
+    closure: Rc<RefCell<Environment>>,
 }
 
 impl Function {
-    pub fn new(declaration: Stmt) -> Self {
+    pub fn new(declaration: Stmt, closure: Rc<RefCell<Environment>>) -> Self {
         if let Stmt::FunctionDeclaration(_, _, _) = declaration {
-            Self { declaration }
+            Self {
+                declaration,
+                closure,
+            }
         } else {
             panic!()
         }
@@ -132,7 +138,7 @@ impl Callable for Function {
                 arguments.len()
             ));
         }
-        let mut environment = Environment::new(HashMap::new(), Some(interpreter.globals.clone()));
+        let mut environment = Environment::new(HashMap::new(), Some(self.closure.clone()));
         if let Stmt::FunctionDeclaration(_, parameters, body) = &self.declaration {
             for (parameter, argument) in parameters.iter().zip(arguments) {
                 environment.define(parameter.lexeme.clone(), argument);
