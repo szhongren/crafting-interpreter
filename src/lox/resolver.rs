@@ -17,6 +17,7 @@ impl<'a> Resolver<'a> {
 
     pub fn resolve(&mut self, statements: &Vec<Stmt>) -> Result<(), String> {
         for statement in statements {
+            println!("resolving: {}", statement);
             self.resolve_statement(statement)?;
         }
         Ok(())
@@ -69,7 +70,6 @@ impl<'a> Resolver<'a> {
     }
 
     fn resolve_expression(&self, expression: &Expr) -> Result<(), String> {
-        println!("{:?}", self.scopes);
         match expression {
             Expr::Assign(name, value) => {
                 self.resolve_expression(value)?;
@@ -141,14 +141,19 @@ impl<'a> Resolver<'a> {
     }
 
     fn begin_scope(&mut self) {
+        println!("begin_scope {:?}", self.scopes);
         self.scopes.push(HashMap::new());
+        println!("begin_scope_end {:?}", self.scopes);
     }
 
     fn end_scope(&mut self) {
+        println!("end_scope {:?}", self.scopes);
         self.scopes.pop();
+        println!("end_scope_end {:?}", self.scopes);
     }
 
     fn declare(&mut self, name: &Token) {
+        println!("declare {:?}", self.scopes);
         if self.scopes.is_empty() {
             return;
         }
@@ -158,9 +163,11 @@ impl<'a> Resolver<'a> {
             .last_mut()
             .unwrap()
             .insert(name.lexeme.clone(), false);
+        println!("declare_end {:?}", self.scopes);
     }
 
     fn define(&mut self, name: &Token) {
+        println!("define {:?}", self.scopes);
         if self.scopes.is_empty() {
             return;
         }
@@ -170,5 +177,6 @@ impl<'a> Resolver<'a> {
             .last_mut()
             .unwrap()
             .insert(name.lexeme.clone(), true);
+        println!("define_end {:?}", self.scopes);
     }
 }

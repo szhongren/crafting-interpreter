@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, env, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use super::{token::Token, value::Value};
 
@@ -58,7 +58,9 @@ impl Environment {
     }
 
     pub fn assign_at(&self, distance: usize, name: String, value: Value) {
-        self.ancestor(distance).values.insert(name, value);
+        self.ancestor(distance)
+            .values
+            .insert(name.clone(), value.clone());
     }
 
     fn ancestor(&self, distance: usize) -> Environment {

@@ -150,7 +150,7 @@ impl Interpreter {
             Expr::NilLiteral => Ok(Value::Nil),
             Expr::TrueLiteral => Ok(Value::Bool(true)),
             Expr::FalseLiteral => Ok(Value::Bool(false)),
-            Expr::Variable(token) => Ok(self.environment.borrow().get(token.lexeme)?),
+            Expr::Variable(token) => Ok(self.lookup_variable(token, &expr)?),
             Expr::Logical(left, operator, right) => {
                 let left_value = self.evaluate(*left)?;
                 if TokenType::Or == operator.token_type && self.is_truthy(left_value.clone()) {

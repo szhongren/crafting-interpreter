@@ -11,7 +11,6 @@ pub mod token_type;
 pub mod value;
 
 use std::{
-    borrow::Borrow,
     fs,
     io::{self, Write},
     process::exit,
