@@ -2,13 +2,13 @@ use std::collections::HashMap;
 
 use super::{expr::Expr, interpreter::Interpreter, stmt::Stmt, token::Token};
 
-pub struct Resolver {
-    interpreter: Interpreter,
+pub struct Resolver<'a> {
+    interpreter: &'a Interpreter,
     scopes: Vec<HashMap<String, bool>>,
 }
 
-impl Resolver {
-    pub fn new(interpreter: Interpreter) -> Self {
+impl<'a> Resolver<'a> {
+    pub fn new(interpreter: &'a Interpreter) -> Self {
         Self {
             interpreter,
             scopes: Vec::new(),
@@ -69,6 +69,7 @@ impl Resolver {
     }
 
     fn resolve_expression(&self, expression: &Expr) -> Result<(), String> {
+        println!("{:?}", self.scopes);
         match expression {
             Expr::Assign(name, value) => {
                 self.resolve_expression(value)?;
@@ -91,7 +92,7 @@ impl Resolver {
             Expr::FalseLiteral => (),
             Expr::Variable(name) => {
                 if !self.scopes.is_empty()
-                    && self.scopes.last().unwrap().get(&name.lexeme).unwrap() == &false
+                    && self.scopes.last().unwrap().get(&name.lexeme) == Some(&false)
                 {
                     return Err(String::from(
                         "Can't read local variable in its own initializer",
@@ -103,7 +104,12 @@ impl Resolver {
                 self.resolve_expression(left)?;
                 self.resolve_expression(right)?;
             }
-            Expr::Call(_, _, _) => todo!(),
+            Expr::Call(callee, _, arguments) => {
+                self.resolve_expression(callee)?;
+                for argument in arguments {
+                    self.resolve_expression(argument)?;
+                }
+            }
         }
         Ok(())
     }

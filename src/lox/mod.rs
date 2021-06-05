@@ -84,6 +84,16 @@ impl Lox {
         }
 
         let mut interpreter = Interpreter::new();
+        let mut resolver = Resolver::new(&interpreter);
+        let resolution = resolver.resolve(&stmts.clone().unwrap());
+
+        if let Err(err) = resolution {
+            println!("{}", err);
+            if !reset_errors {
+                exit(65);
+            }
+        }
+
         let value = interpreter.interpret(stmts.expect("failed at interpreting"));
 
         if let Err(err) = value {
