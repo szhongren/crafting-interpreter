@@ -48,14 +48,14 @@ impl<'a> Resolver<'a> {
                 self.resolve_statement(statement)?;
             }
             Stmt::VariableDeclaration(name, initializer) => {
-                self.declare(name);
+                self.declare(name)?;
                 if **initializer != Expr::NilLiteral {
                     self.resolve_expression(initializer)?;
                 }
                 self.define(name);
             }
             Stmt::FunctionDeclaration(name, _, _) => {
-                self.declare(name);
+                self.declare(name)?;
                 self.define(name);
 
                 self.resolve_function(statement)?;
@@ -130,7 +130,7 @@ impl<'a> Resolver<'a> {
         self.begin_scope();
         if let Stmt::FunctionDeclaration(_, params, body) = function {
             for param in params {
-                self.declare(param);
+                self.declare(param)?;
                 self.define(param);
             }
             self.resolve(body)?;
@@ -149,9 +149,13 @@ impl<'a> Resolver<'a> {
         self.scopes.pop();
     }
 
-    fn declare(&mut self, name: &Token) {
+    fn declare(&mut self, name: &Token) -> Result<(), String> {
         if self.scopes.is_empty() {
-            return;
+            return Ok(());
+        }
+
+        if self.scopes.last().unwrap().contains_key(&name.lexeme) {
+            return Err("Variable with this name already exists in this scope.".to_string());
         }
 
         // means that the variable assignment exists and we know about it
@@ -159,6 +163,8 @@ impl<'a> Resolver<'a> {
             .last_mut()
             .unwrap()
             .insert(name.lexeme.clone(), false);
+
+        Ok(())
     }
 
     fn define(&mut self, name: &Token) {
