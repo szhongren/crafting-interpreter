@@ -2,9 +2,16 @@ use std::collections::HashMap;
 
 use super::{expr::Expr, interpreter::Interpreter, stmt::Stmt, token::Token};
 
+#[derive(Clone, Copy, PartialEq)]
+enum FunctionType {
+    Function,
+    None,
+}
+
 pub struct Resolver<'a> {
     interpreter: &'a Interpreter,
     scopes: Vec<HashMap<String, bool>>,
+    current_function: FunctionType,
 }
 
 impl<'a> Resolver<'a> {
@@ -12,6 +19,7 @@ impl<'a> Resolver<'a> {
         Self {
             interpreter,
             scopes: Vec::new(),
+            current_function: FunctionType::None,
         }
     }
 
@@ -58,9 +66,12 @@ impl<'a> Resolver<'a> {
                 self.declare(name)?;
                 self.define(name);
 
-                self.resolve_function(statement)?;
+                self.resolve_function(statement, &FunctionType::Function)?;
             }
             Stmt::Return(_, value) => {
+                if self.current_function == FunctionType::None {
+                    return Err("Can't return from top level code".to_string());
+                }
                 if **value != Expr::NilLiteral {
                     self.resolve_expression(value)?;
                 }
@@ -126,15 +137,22 @@ impl<'a> Resolver<'a> {
         }
     }
 
-    fn resolve_function(&mut self, function: &Stmt) -> Result<(), String> {
+    fn resolve_function(
+        &mut self,
+        function: &Stmt,
+        function_type: &FunctionType,
+    ) -> Result<(), String> {
+        let enclosing_function = function_type;
         self.begin_scope();
         if let Stmt::FunctionDeclaration(_, params, body) = function {
+            self.current_function = *function_type;
             for param in params {
                 self.declare(param)?;
                 self.define(param);
             }
             self.resolve(body)?;
             self.end_scope();
+            self.current_function = *enclosing_function;
             Ok(())
         } else {
             Err(format!("Unexpected statement {}", function))
