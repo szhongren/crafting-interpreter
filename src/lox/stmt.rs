@@ -37,7 +37,7 @@ impl Display for Stmt {
             Stmt::While(condition, body) => write!(f, "(while {} do {})", condition, body),
             Stmt::VariableDeclaration(name, expr) => write!(f, "(var {} = {})", name.lexeme, expr),
             Stmt::ClassDeclaration(name, methods) => {
-                write!(f, "(class {}", name.lexeme);
+                write!(f, "(class {}", name.lexeme)?;
                 for method in methods {
                     write!(f, " {}", method)?;
                 }
