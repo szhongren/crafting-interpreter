@@ -26,8 +26,8 @@ impl Callable for Class {
 
     fn call(
         &self,
-        interpreter: &mut super::interpreter::Interpreter,
-        arguments: Vec<super::value::Value>,
+        _interpreter: &mut super::interpreter::Interpreter,
+        _arguments: Vec<super::value::Value>,
     ) -> Result<super::value::Value, String> {
         Ok(Value::Instance(Instance::new(self.clone())))
     }

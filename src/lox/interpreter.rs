@@ -181,6 +181,14 @@ impl Interpreter {
                 }
                 callee.call(self, arguments)
             }
+            Expr::Get(object, name) => {
+                let object = self.evaluate(*object)?;
+                if let Value::Instance(instance) = object {
+                    instance.get(name.lexeme)
+                } else {
+                    Err("Only instances have properties".to_string())
+                }
+            }
         }
     }
 

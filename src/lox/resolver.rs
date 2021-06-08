@@ -126,6 +126,9 @@ impl<'a> Resolver<'a> {
                     self.resolve_expression(argument)?;
                 }
             }
+            Expr::Get(object, _) => {
+                self.resolve_expression(object)?;
+            }
         }
         Ok(())
     }

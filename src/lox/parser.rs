@@ -391,7 +391,7 @@ impl Parser {
     }
 
     fn call(&self) -> Result<Expr, String> {
-        // call           → primary ( "(" arguments? ")" )* ;
+        // call            → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
         let mut expr = self.primary()?;
         loop {
             if self.match_token_types(vec![TokenType::LeftParen]) {
@@ -413,6 +413,11 @@ impl Parser {
                 let paren = self.consume(TokenType::RightParen, "Expected ')' after arguments")?;
 
                 expr = Expr::Call(Box::from(expr), paren, arguments);
+            } else if self.match_token_types(vec![TokenType::Dot]) {
+                let name =
+                    self.consume(TokenType::Identifier, "Expected property name after '.'")?;
+
+                expr = Expr::Get(Box::from(expr), name);
             } else {
                 break;
             }
