@@ -3,6 +3,7 @@ use std::fmt::{Debug, Display};
 use super::{
     callable::{Callable, Function, NativeFunction},
     class::Class,
+    instance::Instance,
     interpreter::Interpreter,
 };
 
@@ -15,6 +16,7 @@ pub enum Value {
     NativeFunction(NativeFunction),
     Function(Function),
     Class(Class),
+    Instance(Instance),
 }
 
 impl Value {
@@ -27,6 +29,8 @@ impl Value {
             function.call(interpreter, arguments)
         } else if let Value::Function(function) = self {
             function.call(interpreter, arguments)
+        } else if let Value::Class(class) = self {
+            class.call(interpreter, arguments)
         } else {
             Err(format!("Value {} is not callable", self))
         }
@@ -64,6 +68,7 @@ impl Display for Value {
                 Value::NativeFunction(callable) => format!("{}", callable),
                 Value::Function(callable) => format!("{}", callable),
                 Value::Class(klass) => format!("{}", klass),
+                Value::Instance(instance) => format!("{}", instance),
             }
         )
     }

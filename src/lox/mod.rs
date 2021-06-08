@@ -2,6 +2,7 @@ mod callable;
 mod class;
 mod environment;
 pub mod expr;
+mod instance;
 mod interpreter;
 mod parser;
 mod resolver;
