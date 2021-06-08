@@ -151,7 +151,7 @@ term            → factor ( ( "-" | "+" ) factor )* ;
 factor          → unary ( ( "/" | "*" ) unary )* ; // instead of making it left-recursive, we make it a flat sequence of mults/divs
 unary           → ( "!" | "-" ) unary // recursive urnary
                 | call ;
-call            → primary ( "(" arguments? ")" )* ;
+call            → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 arguments       → expression ( "," expression )* ;
 primary         → NUMBER | STRING | "true" | "false" | "nil"
                 | "(" expression ")" | IDENTIFIER;
