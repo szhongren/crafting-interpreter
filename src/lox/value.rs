@@ -2,6 +2,7 @@ use std::fmt::{Debug, Display};
 
 use super::{
     callable::{Callable, Function, NativeFunction},
+    class::Class,
     interpreter::Interpreter,
 };
 
@@ -13,6 +14,7 @@ pub enum Value {
     Nil,
     NativeFunction(NativeFunction),
     Function(Function),
+    Class(Class),
 }
 
 impl Value {
@@ -61,6 +63,7 @@ impl Display for Value {
                 Value::Nil => String::from("nil"),
                 Value::NativeFunction(callable) => format!("{}", callable),
                 Value::Function(callable) => format!("{}", callable),
+                Value::Class(klass) => format!("{}", klass),
             }
         )
     }

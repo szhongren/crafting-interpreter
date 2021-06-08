@@ -31,8 +31,16 @@ impl Parser {
     }
 
     fn declaration(&self) -> Result<Stmt, String> {
-        // declaration    → varDecl | statement;
-        if self.match_token_types(vec![TokenType::Fun]) {
+        // declaration     → classDecl | funDecl | varDecl | statement ;
+        if self.match_token_types(vec![TokenType::Class]) {
+            match self.class_declaration() {
+                Ok(class_declaration) => Ok(class_declaration),
+                Err(err) => {
+                    self.synchronize();
+                    Err(err)
+                }
+            }
+        } else if self.match_token_types(vec![TokenType::Fun]) {
             match self.func_declaration("function") {
                 Ok(func_declaration) => Ok(func_declaration),
                 Err(err) => {
@@ -57,6 +65,19 @@ impl Parser {
                 }
             }
         }
+    }
+
+    fn class_declaration(&self) -> Result<Stmt, String> {
+        let name = self.consume(TokenType::Identifier, "Expected class name")?;
+        self.consume(TokenType::LeftBrace, "Expected '{' before class body")?;
+
+        let mut methods = Vec::new();
+        while !self.check(TokenType::RightBrace) && !self.is_at_end() {
+            methods.push(self.func_declaration("method")?);
+        }
+
+        self.consume(TokenType::RightBrace, "Expected '}' after class body")?;
+        Ok(Stmt::ClassDeclaration(Box::from(name), methods))
     }
 
     fn func_declaration(&self, kind: &str) -> Result<Stmt, String> {

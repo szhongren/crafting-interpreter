@@ -55,6 +55,10 @@ impl<'a> Resolver<'a> {
                 self.resolve_expression(condition)?;
                 self.resolve_statement(statement)?;
             }
+            Stmt::ClassDeclaration(name, _) => {
+                self.declare(name)?;
+                self.define(name);
+            }
             Stmt::VariableDeclaration(name, initializer) => {
                 self.declare(name)?;
                 if **initializer != Expr::NilLiteral {

@@ -1,4 +1,5 @@
 mod callable;
+mod class;
 mod environment;
 pub mod expr;
 mod interpreter;

@@ -9,6 +9,7 @@ use std::{
 
 use super::{
     callable::{Function, NativeFunction},
+    class::Class,
     environment::Environment,
     expr::Expr,
     stmt::Stmt,
@@ -83,6 +84,15 @@ impl Interpreter {
                     evaluation = self.evaluate(*condition.clone())?;
                 }
             }
+            Stmt::ClassDeclaration(name, _) => {
+                self.environment
+                    .borrow_mut()
+                    .define(name.lexeme.clone(), Value::Nil);
+                let klass = Class::new(name.lexeme.clone());
+                self.environment
+                    .borrow_mut()
+                    .assign(name.lexeme, Value::Class(klass))?;
+            }
             Stmt::FunctionDeclaration(name, _, _) => {
                 let function = Value::Function(Function::new(stmt, self.environment.clone()));
                 self.environment.borrow_mut().define(name.lexeme, function);
@@ -135,7 +145,7 @@ impl Interpreter {
                     None => {
                         self.globals
                             .borrow_mut()
-                            .assign(name, evaluated_value.clone())?;
+                            .assign(name.lexeme, evaluated_value.clone())?;
                     }
                 }
                 Ok(evaluated_value)

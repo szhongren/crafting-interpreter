@@ -31,10 +31,10 @@ impl Environment {
         }
     }
 
-    pub fn assign(&mut self, name: Token, value: Value) -> Result<(), String> {
+    pub fn assign(&mut self, name: String, value: Value) -> Result<(), String> {
         // println!("setting {} in {:?} to {:?}", name.lexeme, self, value);
-        if self.values.contains_key(&name.lexeme) {
-            self.values.insert(name.lexeme, value);
+        if self.values.contains_key(&name) {
+            self.values.insert(name, value);
             return Ok(());
         }
 
@@ -47,7 +47,7 @@ impl Environment {
             return Ok(());
         };
 
-        Err(format!("Undefined variable: '{}'", name.lexeme))
+        Err(format!("Undefined variable: '{}'", name))
     }
 
     pub fn get_at(&self, distance: usize, name: String) -> Result<Value, String> {
