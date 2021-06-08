@@ -1,6 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use super::{token::Token, value::Value};
+use super::value::Value;
 
 #[derive(Clone, Debug)]
 pub struct Environment {
