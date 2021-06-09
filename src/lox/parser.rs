@@ -282,13 +282,17 @@ impl Parser {
     }
 
     fn assignment(&self) -> Result<Expr, String> {
-        // assignment     → IDENTIFIER "=" assignment | logic_or ;
+        // assignment      → ( call "." )? IDENTIFIER "=" assignment
+        //                 | logic_or ;
         let expr = self.or()?;
         if self.match_token_types(vec![TokenType::Equal]) {
             let equals = self.previous();
             let value = self.assignment()?;
             match expr {
                 Expr::Variable(name) => return Ok(Expr::Assign(name, Box::from(value))),
+                Expr::Get(object, name) => {
+                    return Ok(Expr::Set(Box::from(object), name, Box::from(value)))
+                }
                 _ => return Err(format!("Invalid assignment: {} {} {}", expr, equals, value)),
             }
         };

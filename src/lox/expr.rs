@@ -17,6 +17,7 @@ pub enum Expr {
     Logical(Box<Expr>, Token, Box<Expr>),
     Call(Box<Expr>, Token, Vec<Expr>),
     Get(Box<Expr>, Token),
+    Set(Box<Expr>, Token, Box<Expr>),
 }
 
 impl std::hash::Hash for Expr {
@@ -70,6 +71,11 @@ impl std::hash::Hash for Expr {
                 a.hash(state);
                 b.hash(state);
             }
+            Expr::Set(a, b, c) => {
+                a.hash(state);
+                b.hash(state);
+                c.hash(state);
+            }
         }
     }
 }
@@ -103,6 +109,9 @@ impl Display for Expr {
             }
             Expr::Get(object, name) => {
                 write!(f, "(get {}.{})", object, name.lexeme)
+            }
+            Expr::Set(object, name, value) => {
+                write!(f, "(set {}.{} = {})", object, name.lexeme, value)
             }
         }
     }
