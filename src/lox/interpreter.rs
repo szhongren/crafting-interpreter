@@ -189,6 +189,17 @@ impl Interpreter {
                     Err("Only instances have properties".to_string())
                 }
             }
+            Expr::Set(object, name, value) => {
+                let object = self.evaluate(*object)?;
+                match object {
+                    Value::Instance(mut instance) => {
+                        let value = self.evaluate(*value)?;
+                        instance.set(name.lexeme, value.clone());
+                        Ok(value)
+                    }
+                    _ => Err("Only instances have fields".to_string()),
+                }
+            }
         }
     }
 

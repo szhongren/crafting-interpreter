@@ -23,6 +23,10 @@ impl Instance {
             None => Err(format!("Undefined property '{}'", name)),
         }
     }
+
+    pub fn set(&mut self, name: String, value: Value) {
+        self.fields.insert(name, value);
+    }
 }
 
 impl Display for Instance {
