@@ -84,11 +84,21 @@ impl Interpreter {
                     evaluation = self.evaluate(*condition.clone())?;
                 }
             }
-            Stmt::ClassDeclaration(name, _) => {
+            Stmt::ClassDeclaration(name, methods) => {
                 self.environment
                     .borrow_mut()
                     .define(name.lexeme.clone(), Value::Nil);
-                let klass = Class::new(name.lexeme.clone());
+                let mut methods_map = HashMap::new();
+                for method in methods {
+                    if let Stmt::FunctionDeclaration(name, _, _) = &method {
+                        methods_map.insert(
+                            name.lexeme.clone(),
+                            Value::Function(Function::new(method, self.environment.clone())),
+                        );
+                    }
+                }
+                println!("{:?}", &methods_map);
+                let klass = Class::new(name.lexeme.clone(), methods_map);
                 self.environment
                     .borrow_mut()
                     .assign(name.lexeme, Value::Class(klass))?;

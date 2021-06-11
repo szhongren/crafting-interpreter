@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::Display;
 
 use super::{callable::Callable, instance::Instance, value::Value};
@@ -5,11 +6,16 @@ use super::{callable::Callable, instance::Instance, value::Value};
 #[derive(Clone, PartialEq, Debug)]
 pub struct Class {
     name: String,
+    methods: HashMap<String, Value>,
 }
 
 impl Class {
-    pub fn new(name: String) -> Self {
-        Self { name }
+    pub fn new(name: String, methods: HashMap<String, Value>) -> Self {
+        Self { name, methods }
+    }
+
+    pub fn find_method(&self, name: &String) -> Option<&Value> {
+        self.methods.get(name)
     }
 }
 

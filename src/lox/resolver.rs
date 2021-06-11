@@ -5,6 +5,7 @@ use super::{expr::Expr, interpreter::Interpreter, stmt::Stmt, token::Token};
 #[derive(Clone, Copy, PartialEq)]
 enum FunctionType {
     Function,
+    Method,
     None,
 }
 
@@ -55,9 +56,13 @@ impl<'a> Resolver<'a> {
                 self.resolve_expression(condition)?;
                 self.resolve_statement(statement)?;
             }
-            Stmt::ClassDeclaration(name, _) => {
+            Stmt::ClassDeclaration(name, methods) => {
                 self.declare(name)?;
                 self.define(name);
+
+                for method in methods {
+                    self.resolve_function(method, &FunctionType::Method)?;
+                }
             }
             Stmt::VariableDeclaration(name, initializer) => {
                 self.declare(name)?;
