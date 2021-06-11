@@ -16,20 +16,3 @@ var box = Box();
 box.function = notMethod;
 box.function("argument");
 
-class Person {
-  sayName() {
-    print this.name;
-  }
-}
-
-var jane = Person();
-jane.name = "Jane";
-
-var method = jane.sayName;
-method(); // ?
-
-var bill = Person();
-bill.name = "Bill";
-
-bill.sayName = jane.sayName;
-bill.sayName(); // ?

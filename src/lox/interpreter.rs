@@ -97,7 +97,6 @@ impl Interpreter {
                         );
                     }
                 }
-                println!("{:?}", &methods_map);
                 let klass = Class::new(name.lexeme.clone(), methods_map);
                 self.environment
                     .borrow_mut()
@@ -200,11 +199,16 @@ impl Interpreter {
                 }
             }
             Expr::Set(object, name, value) => {
-                let object = self.evaluate(*object)?;
-                match object {
+                let evaluated_object = self.evaluate(*object.clone())?;
+                match evaluated_object {
                     Value::Instance(mut instance) => {
                         let value = self.evaluate(*value)?;
-                        instance.set(name.lexeme, value.clone());
+                        instance.set(name.lexeme.clone(), value.clone());
+                        if let Expr::Variable(object_name) = *object {
+                            self.environment
+                                .borrow_mut()
+                                .assign(object_name.lexeme, Value::Instance(instance.clone()))?;
+                        }
                         Ok(value)
                     }
                     _ => Err("Only instances have fields".to_string()),

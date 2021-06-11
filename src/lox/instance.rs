@@ -18,7 +18,6 @@ impl Instance {
 
     pub fn get(&self, name: String) -> Result<Value, String> {
         let value = self.fields.get(&name);
-        println!("getting {} from {:?}", name, self.fields);
         match value {
             Some(result) => Ok(result.clone()),
             None => match self.klass.find_method(&name) {
