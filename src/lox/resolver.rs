@@ -9,10 +9,17 @@ enum FunctionType {
     None,
 }
 
+#[derive(Clone, Copy, PartialEq)]
+enum ClassType {
+    None,
+    Class,
+}
+
 pub struct Resolver<'a> {
     interpreter: &'a Interpreter,
     scopes: Vec<HashMap<String, bool>>,
     current_function: FunctionType,
+    current_class: ClassType,
 }
 
 impl<'a> Resolver<'a> {
@@ -21,6 +28,7 @@ impl<'a> Resolver<'a> {
             interpreter,
             scopes: Vec::new(),
             current_function: FunctionType::None,
+            current_class: ClassType::None,
         }
     }
 
@@ -57,6 +65,9 @@ impl<'a> Resolver<'a> {
                 self.resolve_statement(statement)?;
             }
             Stmt::ClassDeclaration(name, methods) => {
+                let enclosing_class = self.current_class;
+                self.current_class = ClassType::Class;
+
                 self.declare(name)?;
                 self.define(name);
 
@@ -71,6 +82,8 @@ impl<'a> Resolver<'a> {
                 }
 
                 self.end_scope();
+
+                self.current_class = enclosing_class;
             }
             Stmt::VariableDeclaration(name, initializer) => {
                 self.declare(name)?;
@@ -146,9 +159,14 @@ impl<'a> Resolver<'a> {
                 self.resolve_expression(object)?;
                 self.resolve_expression(value)?;
             }
-            Expr::This(keyword) => {
-                self.resolve_local(expression, keyword);
-            }
+            Expr::This(keyword) => match self.current_class {
+                ClassType::Class => {
+                    self.resolve_local(expression, keyword);
+                }
+                ClassType::None => {
+                    return Err("Can't use this outside of a class".to_string());
+                }
+            },
         }
         Ok(())
     }
