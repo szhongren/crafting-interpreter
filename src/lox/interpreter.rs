@@ -214,6 +214,7 @@ impl Interpreter {
                     _ => Err("Only instances have fields".to_string()),
                 }
             }
+            Expr::This(keyword) => self.lookup_variable(keyword, &expr),
         }
     }
 

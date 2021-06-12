@@ -21,7 +21,7 @@ impl Instance {
         match value {
             Some(result) => Ok(result.clone()),
             None => match self.klass.find_method(&name) {
-                Some(method) => Ok(method.clone()),
+                Some(method) => method.bind(self),
                 None => Err(format!("Undefined property '{}'", name)),
             },
         }

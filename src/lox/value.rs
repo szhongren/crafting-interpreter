@@ -35,6 +35,14 @@ impl Value {
             Err(format!("Value {} is not callable", self))
         }
     }
+
+    pub fn bind(&self, instance: &Instance) -> Result<Value, String> {
+        if let Value::Function(method) = self {
+            method.bind(instance)
+        } else {
+            Err(format!("Cannot perform bind on {}", self))
+        }
+    }
 }
 
 impl From<bool> for Value {

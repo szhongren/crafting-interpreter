@@ -5,7 +5,10 @@ use std::{
     rc::Rc,
 };
 
-use super::{environment::Environment, interpreter::Interpreter, stmt::Stmt, value::Value};
+use super::{
+    environment::Environment, instance::Instance, interpreter::Interpreter, stmt::Stmt,
+    value::Value,
+};
 
 pub trait Callable {
     fn arity(&self) -> usize;
@@ -84,6 +87,15 @@ impl Function {
         } else {
             panic!()
         }
+    }
+
+    pub fn bind(&self, instance: &Instance) -> Result<Value, String> {
+        let mut environment = Environment::new(HashMap::new(), Some(self.closure.clone()));
+        environment.define("this".to_string(), Value::Instance(instance.clone()));
+        Ok(Value::Function(Function::new(
+            self.declaration.clone(),
+            Rc::from(RefCell::from(environment)),
+        )))
     }
 }
 
