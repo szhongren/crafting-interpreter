@@ -15,3 +15,23 @@ bill.name = "Bill";
 
 bill.sayName = jane.sayName;
 bill.sayName(); // ?
+
+class Egotist {
+  speak() {
+    print this;
+  }
+}
+
+var method = Egotist().speak;
+method();
+
+class Cake {
+  taste() {
+    var adjective = "delicious";
+    print "The " + this.flavor + " cake is " + adjective + "!";
+  }
+}
+
+var cake = Cake();
+cake.flavor = "German chocolate";
+cake.taste(); // Prints "The German chocolate cake is delicious!".
