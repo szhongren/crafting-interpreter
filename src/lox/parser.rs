@@ -450,6 +450,8 @@ impl Parser {
             } else {
                 Err("Expected string literal".to_string())
             }
+        } else if self.match_token_types(vec![TokenType::This]) {
+            Ok(Expr::This(self.previous()))
         } else if self.match_token_types(vec![TokenType::Identifier]) {
             Ok(Expr::Variable(self.previous()))
         } else if self.match_token_types(vec![TokenType::LeftParen]) {

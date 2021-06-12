@@ -60,9 +60,17 @@ impl<'a> Resolver<'a> {
                 self.declare(name)?;
                 self.define(name);
 
+                self.begin_scope();
+                self.scopes
+                    .last_mut()
+                    .unwrap()
+                    .insert("this".to_string(), true);
+
                 for method in methods {
                     self.resolve_function(method, &FunctionType::Method)?;
                 }
+
+                self.end_scope();
             }
             Stmt::VariableDeclaration(name, initializer) => {
                 self.declare(name)?;
@@ -137,6 +145,9 @@ impl<'a> Resolver<'a> {
             Expr::Set(object, _, value) => {
                 self.resolve_expression(object)?;
                 self.resolve_expression(value)?;
+            }
+            Expr::This(keyword) => {
+                self.resolve_local(expression, keyword);
             }
         }
         Ok(())
