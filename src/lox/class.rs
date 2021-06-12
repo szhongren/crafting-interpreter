@@ -27,7 +27,13 @@ impl Display for Class {
 
 impl Callable for Class {
     fn arity(&self) -> usize {
-        0
+        match self.find_method(&"init".to_string()) {
+            Some(initializer_value) => match initializer_value {
+                Value::Function(function) => function.arity(),
+                _ => 0,
+            },
+            None => 0,
+        }
     }
 
     fn call(
@@ -35,6 +41,11 @@ impl Callable for Class {
         _interpreter: &mut super::interpreter::Interpreter,
         _arguments: Vec<super::value::Value>,
     ) -> Result<super::value::Value, String> {
-        Ok(Value::Instance(Instance::new(self.clone())))
+        let instance = Instance::new(self.clone());
+        let initializer = self.find_method(&"init".to_string());
+        if let Some(initializer_value) = initializer {
+            initializer_value.bind(&instance)?;
+        }
+        Ok(Value::Instance(instance))
     }
 }

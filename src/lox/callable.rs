@@ -73,16 +73,18 @@ impl Callable for NativeFunction {
 
 #[derive(Clone)]
 pub struct Function {
+    is_initializer: bool,
     declaration: Stmt,
     closure: Rc<RefCell<Environment>>,
 }
 
 impl Function {
-    pub fn new(declaration: Stmt, closure: Rc<RefCell<Environment>>) -> Self {
+    pub fn new(declaration: Stmt, closure: Rc<RefCell<Environment>>, is_initializer: bool) -> Self {
         if let Stmt::FunctionDeclaration(_, _, _) = declaration {
             Self {
                 declaration,
                 closure,
+                is_initializer,
             }
         } else {
             panic!()
@@ -95,6 +97,7 @@ impl Function {
         Ok(Value::Function(Function::new(
             self.declaration.clone(),
             Rc::from(RefCell::from(environment)),
+            self.is_initializer,
         )))
     }
 }
@@ -156,8 +159,18 @@ impl Callable for Function {
                 environment.define(parameter.lexeme.clone(), argument);
             }
             match interpreter.execute_block(body.to_vec(), environment) {
-                Ok(_) => Ok(Value::Nil),
-                Err(value) => Ok(value),
+                Ok(_) => Ok(if self.is_initializer {
+                    self.closure.borrow().get_at(0, "this".to_string())?
+                } else {
+                    Value::Nil
+                }),
+                Err(value) => {
+                    if self.is_initializer {
+                        self.closure.borrow().get_at(0, "this".to_string())
+                    } else {
+                        Ok(value)
+                    }
+                }
             }
         } else {
             panic!()

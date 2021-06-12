@@ -6,6 +6,7 @@ use super::{expr::Expr, interpreter::Interpreter, stmt::Stmt, token::Token};
 enum FunctionType {
     Function,
     Method,
+    Initializer,
     None,
 }
 
@@ -78,7 +79,16 @@ impl<'a> Resolver<'a> {
                     .insert("this".to_string(), true);
 
                 for method in methods {
-                    self.resolve_function(method, &FunctionType::Method)?;
+                    if let Stmt::FunctionDeclaration(method_name, _, _) = method {
+                        self.resolve_function(
+                            method,
+                            if method_name.lexeme == "init" {
+                                &FunctionType::Initializer
+                            } else {
+                                &FunctionType::Method
+                            },
+                        )?;
+                    }
                 }
 
                 self.end_scope();
@@ -103,6 +113,9 @@ impl<'a> Resolver<'a> {
                     return Err("Can't return from top level code".to_string());
                 }
                 if **value != Expr::NilLiteral {
+                    if self.current_function == FunctionType::Initializer {
+                        return Err("Cant return a value from an initializer".to_string());
+                    }
                     self.resolve_expression(value)?;
                 }
             }

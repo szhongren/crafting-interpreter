@@ -93,7 +93,11 @@ impl Interpreter {
                     if let Stmt::FunctionDeclaration(name, _, _) = &method {
                         methods_map.insert(
                             name.lexeme.clone(),
-                            Value::Function(Function::new(method, self.environment.clone())),
+                            Value::Function(Function::new(
+                                method.clone(),
+                                self.environment.clone(),
+                                name.lexeme.clone() == "init".to_string(),
+                            )),
                         );
                     }
                 }
@@ -103,7 +107,8 @@ impl Interpreter {
                     .assign(name.lexeme, Value::Class(klass))?;
             }
             Stmt::FunctionDeclaration(name, _, _) => {
-                let function = Value::Function(Function::new(stmt, self.environment.clone()));
+                let function =
+                    Value::Function(Function::new(stmt, self.environment.clone(), false));
                 self.environment.borrow_mut().define(name.lexeme, function);
             }
             Stmt::Return(_, value) => {
