@@ -65,12 +65,21 @@ impl<'a> Resolver<'a> {
                 self.resolve_expression(condition)?;
                 self.resolve_statement(statement)?;
             }
-            Stmt::ClassDeclaration(name, methods) => {
+            Stmt::ClassDeclaration(name, superclass, methods) => {
                 let enclosing_class = self.current_class;
                 self.current_class = ClassType::Class;
 
                 self.declare(name)?;
                 self.define(name);
+
+                if let Some(superclass) = superclass {
+                    if let Expr::Variable(superclass_name) = superclass {
+                        if name.lexeme == superclass_name.lexeme {
+                            return Err("A class can't inherit from itself".to_string());
+                        }
+                        self.resolve_expression(superclass)?;
+                    }
+                }
 
                 self.begin_scope();
                 self.scopes

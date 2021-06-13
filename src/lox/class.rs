@@ -6,22 +6,37 @@ use super::{callable::Callable, instance::Instance, value::Value};
 #[derive(Clone, PartialEq, Debug)]
 pub struct Class {
     name: String,
+    superclass: Option<Box<Class>>,
     methods: HashMap<String, Value>,
 }
 
 impl Class {
-    pub fn new(name: String, methods: HashMap<String, Value>) -> Self {
-        Self { name, methods }
+    pub fn new(
+        name: String,
+        superclass: Option<Box<Class>>,
+        methods: HashMap<String, Value>,
+    ) -> Self {
+        Self {
+            name,
+            superclass,
+            methods,
+        }
     }
 
     pub fn find_method(&self, name: &String) -> Option<&Value> {
-        self.methods.get(name)
+        match self.methods.get(name) {
+            Some(_) => self.methods.get(name),
+            None => match self.superclass {
+                Some(_) => self.superclass.as_ref().unwrap().find_method(name),
+                None => None,
+            },
+        }
     }
 }
 
 impl Display for Class {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "(class {})", self.name)
+        write!(f, "(class {} < {:?})", self.name, self.superclass)
     }
 }
 

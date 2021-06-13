@@ -84,7 +84,17 @@ impl Interpreter {
                     evaluation = self.evaluate(*condition.clone())?;
                 }
             }
-            Stmt::ClassDeclaration(name, methods) => {
+            Stmt::ClassDeclaration(name, superclass, methods) => {
+                let mut superklass = None;
+                if let Some(superclass_expr) = superclass.clone() {
+                    let superclass_eval = self.evaluate(superclass_expr)?;
+                    match superclass_eval {
+                        Value::Class(superklass_object) => {
+                            superklass = Some(Box::from(superklass_object))
+                        }
+                        _ => return Err(Value::Nil),
+                    }
+                }
                 self.environment
                     .borrow_mut()
                     .define(name.lexeme.clone(), Value::Nil);
@@ -101,7 +111,7 @@ impl Interpreter {
                         );
                     }
                 }
-                let klass = Class::new(name.lexeme.clone(), methods_map);
+                let klass = Class::new(name.lexeme.clone(), superklass, methods_map);
                 self.environment
                     .borrow_mut()
                     .assign(name.lexeme, Value::Class(klass))?;
