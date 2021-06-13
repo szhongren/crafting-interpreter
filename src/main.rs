@@ -44,7 +44,7 @@ fn main() -> Result<()> {
                     "Stmt",
                     vec![
                         "Block: List<Stmt> statements",
-                        "Class: Token name, List<Stmt.Function> methods",
+                        "Class: Token name, Expr.Variable superclass, List<Stmt.Function> methods",
                         "Expression: Expr expression",
                         "Function: Token name, List<Token> params, List<Stmt> body",
                         "If: Expr condition, Stmt thenBranch, Stmt elseBranch",

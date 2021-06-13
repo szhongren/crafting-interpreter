@@ -118,7 +118,8 @@ added more rules at the top to handle statements
 ```
 program         → declaration* EOF ;
 declaration     → classDecl | funDecl | varDecl | statement ;
-classDecl       → "class" IDENTIFIER "{" function* "}" ;
+classDecl       → "class" IDENTIFIER ( "<" IDENTIFIER )?
+                  "{" function* "}" ;
 funDecl         → "fun" function ;
 function        → IDENTIFIER "(" parameters? ")" block ;
 parameters      → IDENTIFIER ( "," IDENTIFIER )* ;
