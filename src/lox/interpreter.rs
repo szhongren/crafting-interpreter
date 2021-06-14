@@ -86,6 +86,7 @@ impl Interpreter {
             }
             Stmt::ClassDeclaration(name, superclass, methods) => {
                 let mut superklass = None;
+                let original_environment = self.environment.clone();
                 if let Some(superclass_expr) = superclass.clone() {
                     let superclass_eval = self.evaluate(superclass_expr)?;
                     match superclass_eval {
@@ -98,6 +99,17 @@ impl Interpreter {
                 self.environment
                     .borrow_mut()
                     .define(name.lexeme.clone(), Value::Nil);
+
+                if let Some(superclass_expr) = superclass.clone() {
+                    let superclass_eval = self.evaluate(superclass_expr)?;
+                    self.environment = Rc::from(RefCell::from(Environment::new(
+                        HashMap::new(),
+                        Some(self.environment.clone()),
+                    )));
+                    self.environment
+                        .borrow_mut()
+                        .define("super".to_string(), superclass_eval);
+                }
                 let mut methods_map = HashMap::new();
                 for method in methods {
                     if let Stmt::FunctionDeclaration(name, _, _) = &method {
@@ -112,6 +124,11 @@ impl Interpreter {
                     }
                 }
                 let klass = Class::new(name.lexeme.clone(), superklass, methods_map);
+
+                if let Some(_) = superclass.clone() {
+                    self.environment = original_environment;
+                }
+
                 self.environment
                     .borrow_mut()
                     .assign(name.lexeme, Value::Class(klass))?;
@@ -230,6 +247,29 @@ impl Interpreter {
                 }
             }
             Expr::This(keyword) => self.lookup_variable(keyword, &expr),
+            Expr::Super(_, method) => {
+                let distance = *self.locals.borrow().get(&expr).unwrap();
+                let superclass = self
+                    .environment
+                    .borrow()
+                    .get_at(distance, "super".to_string())?;
+                let object = self
+                    .environment
+                    .borrow()
+                    .get_at(distance - 1, "this".to_string())?;
+                if let Value::Class(klass) = superclass {
+                    if let Value::Instance(instance) = object {
+                        match klass.find_method(&method.lexeme) {
+                            Some(klass_method) => klass_method.bind(&instance),
+                            None => Err(format!("Undefined property {}", method.lexeme)),
+                        }
+                    } else {
+                        Err("Something went wrong".to_string())
+                    }
+                } else {
+                    Err("Something went wrong".to_string())
+                }
+            }
         }
     }
 

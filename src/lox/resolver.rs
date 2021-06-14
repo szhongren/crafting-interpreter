@@ -79,6 +79,12 @@ impl<'a> Resolver<'a> {
                         }
                         self.resolve_expression(superclass)?;
                     }
+
+                    self.begin_scope();
+                    self.scopes
+                        .last_mut()
+                        .unwrap()
+                        .insert("super".to_string(), true);
                 }
 
                 self.begin_scope();
@@ -102,6 +108,9 @@ impl<'a> Resolver<'a> {
 
                 self.end_scope();
 
+                if let Some(_) = superclass {
+                    self.end_scope();
+                }
                 self.current_class = enclosing_class;
             }
             Stmt::VariableDeclaration(name, initializer) => {
@@ -189,6 +198,7 @@ impl<'a> Resolver<'a> {
                     return Err("Can't use this outside of a class".to_string());
                 }
             },
+            Expr::Super(keyword, _) => self.resolve_local(expression, keyword),
         }
         Ok(())
     }

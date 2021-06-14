@@ -437,8 +437,9 @@ impl Parser {
     }
 
     fn primary(&self) -> Result<Expr, String> {
-        // primary        → NUMBER | STRING | "true" | "false" | "nil"
-        //                | "(" expression ")" ;
+        // primary         → "true" | "false" | "nil" | "this"
+        //                 | NUMBER | STRING | IDENTIFIER | "(" expression ")"
+        //                 | "super" "." IDENTIFIER ;
         if self.match_token_types(vec![TokenType::True]) {
             Ok(Expr::TrueLiteral)
         } else if self.match_token_types(vec![TokenType::False]) {
@@ -457,6 +458,11 @@ impl Parser {
             } else {
                 Err("Expected string literal".to_string())
             }
+        } else if self.match_token_types(vec![TokenType::Super]) {
+            let keyword = self.previous();
+            self.consume(TokenType::Dot, "Expected '.' after 'super'")?;
+            let method = self.consume(TokenType::Identifier, "Expected superclass method name")?;
+            Ok(Expr::Super(keyword, method))
         } else if self.match_token_types(vec![TokenType::This]) {
             Ok(Expr::This(self.previous()))
         } else if self.match_token_types(vec![TokenType::Identifier]) {

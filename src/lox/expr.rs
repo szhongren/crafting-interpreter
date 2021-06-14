@@ -19,6 +19,7 @@ pub enum Expr {
     Get(Box<Expr>, Token),
     Set(Box<Expr>, Token, Box<Expr>),
     This(Token),
+    Super(Token, Token),
 }
 
 impl std::hash::Hash for Expr {
@@ -80,6 +81,10 @@ impl std::hash::Hash for Expr {
             Expr::This(a) => {
                 a.hash(state);
             }
+            Expr::Super(a, b) => {
+                a.hash(state);
+                b.hash(state);
+            }
         }
     }
 }
@@ -119,6 +124,9 @@ impl Display for Expr {
             }
             Expr::This(keyword) => {
                 write!(f, "(this {})", keyword)
+            }
+            Expr::Super(keyword, method) => {
+                write!(f, "(super {} {})", keyword, method)
             }
         }
     }
